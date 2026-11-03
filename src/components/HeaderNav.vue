@@ -45,7 +45,16 @@
       </nav>
 
       <!-- 右侧功能入口 -->
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-1.5 sm:space-x-2">
+        <button
+          @click="$emit('open-onboarding')"
+          title="30秒手札上手体验速览"
+          class="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-rose-700 bg-rose-50/90 hover:bg-rose-100 border border-rose-200/80 transition-all shadow-sm"
+        >
+          <Sparkles class="w-3.5 h-3.5 text-rose-500" />
+          <span>30s 速览</span>
+        </button>
+
         <button
           @click="$emit('open-scenes')"
           title="更换/管理采风飘窗风景"
@@ -86,6 +95,7 @@ defineProps<{
 
 defineEmits<{
   (e: 'change-tab', tab: 'deck' | 'sandbox'): void;
+  (e: 'open-onboarding'): void;
   (e: 'open-scenes'): void;
   (e: 'open-manual'): void;
   (e: 'open-settings'): void;
