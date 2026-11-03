@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative rounded-3xl bg-white border border-rose-200/70 hover:border-rose-300/90 shadow-fluffy-sm hover:shadow-[0_18px_38px_-6px_rgba(225,120,115,0.13)] hover:-translate-y-1 active:translate-y-0 transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] [transform:translateZ(0)] [backface-visibility:hidden] flex flex-col justify-between overflow-hidden group"
+    class="relative rounded-3xl bg-white/85 backdrop-blur-md border border-white/80 hover:border-rose-300/80 shadow-fluffy-sm hover:shadow-[0_18px_38px_-6px_rgba(225,120,115,0.13)] hover:-translate-y-1 active:translate-y-0 hover:bg-white/95 transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] [transform:translateZ(0)] [backface-visibility:hidden] flex flex-col justify-between overflow-hidden group"
   >
     <!-- 卡片顶部温润双色纸签条 -->
     <div class="h-1.5 w-full bg-gradient-to-r from-rose-200 via-apricot-200 to-pink-200"></div>

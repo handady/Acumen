@@ -1,5 +1,14 @@
 <template>
   <div class="min-h-screen bg-theme-primary text-theme-text-main flex flex-col relative selection:bg-rose-100 selection:text-rose-800">
+    <!-- 全景沉浸式插画背景 (100% 清晰纯净，不加雾化与厚重遮罩，与环境融为一体) -->
+    <div
+      class="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 pointer-events-none"
+      :style="{ backgroundImage: `url(${currentBackground})` }"
+    >
+      <!-- 极轻透环境微光：仅给整屏一层极淡柔光，绝不模糊遮挡插画的精美细节与景深 -->
+      <div class="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/15 pointer-events-none"></div>
+    </div>
+
     <!-- 背景柔和光晕 (Ambient Warm Soft Peach Glow) -->
     <div class="ambient-glow"></div>
 
@@ -23,12 +32,12 @@
         <div v-if="activeTab === 'deck'" key="deck" class="space-y-8">
           <!-- 顶层主舞台：左右严格等高对齐 (items-stretch) -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            <!-- 左侧：治愈书房心境与随思总览 (占 7 列，高度自适应与右侧飘窗拉齐) -->
-            <div class="lg:col-span-7 flex flex-col justify-between p-6 rounded-3xl bg-white border border-rose-200/70 shadow-fluffy-sm hover:shadow-[0_12px_30px_rgba(225,120,115,0.06)] transition-all duration-[380ms] ease-[cubic-bezier(0.16,1,0.3,1)] space-y-5">
-              <!-- 上部：问候语与生活总览 -->
+            <!-- 左侧：治愈书房心境与随思总览 (轻透温润手帐纸感，高度自适应与右侧飘窗拉齐) -->
+            <div class="lg:col-span-7 flex flex-col justify-between p-6 sm:p-7 rounded-3xl bg-white/75 backdrop-blur-sm border border-white/80 shadow-[0_12px_36px_rgba(225,120,115,0.07)] hover:shadow-[0_16px_42px_rgba(225,120,115,0.1)] transition-all duration-[380ms] ease-[cubic-bezier(0.16,1,0.3,1)] space-y-5">
+              <!-- 上部：问候语与桌面实物拟物角 -->
               <div class="space-y-4">
-                <div class="flex items-start justify-between gap-3">
-                  <div>
+                <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div class="space-y-1">
                     <div class="flex items-center space-x-2 text-rose-500 text-xs font-medium mb-1">
                       <span>{{ timeGreeting.icon }}</span>
                       <span>{{ timeGreeting.text }}</span>
@@ -41,23 +50,25 @@
                     </p>
                   </div>
 
-                  <!-- 桌面拟物生活摆件与守护神兽（热茶、绿植、小萌虎/小金狮） -->
-                  <DeskCompanion />
+                  <!-- 桌面拟物生活摆件与守护神兽实物台（热茶、绿植、小萌虎/小金狮） -->
+                  <div class="self-end sm:self-auto">
+                    <DeskCompanion />
+                  </div>
                 </div>
 
                 <!-- 诗意温和的生活小结条 (告别冰冷数字大方框) -->
                 <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                  <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-rose-50/70 border border-rose-100 text-rose-700">
+                  <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-rose-50/80 border border-rose-100 text-rose-700">
                     <span>📖</span>
                     <span><strong>{{ ruleStore.totalRulesCount }}</strong> 篇珍藏心法</span>
                   </span>
 
-                  <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-sage-50 border border-sage-100 text-sage-700">
+                  <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-sage-50/80 border border-sage-100 text-sage-700">
                     <span>🌱</span>
                     <span><strong>{{ ruleStore.totalCasesCount }}</strong> 次生活映照</span>
                   </span>
 
-                  <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-apricot-50 border border-apricot-100 text-apricot-700">
+                  <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-apricot-50/80 border border-apricot-100 text-apricot-700">
                     <span>🕊️</span>
                     <span>探针采风 {{ ruleStore.scoutCasesCount }} / 随笔 {{ ruleStore.manualCasesCount }}</span>
                   </span>
@@ -103,7 +114,7 @@
                     v-model="searchQuery"
                     type="text"
                     placeholder="轻轻翻寻某条心法、困惑、或是生活解法..."
-                    class="w-full pl-9 pr-8 py-2 rounded-2xl bg-theme-secondary/90 border border-rose-100/80 text-xs focus:outline-none focus:ring-2 focus:ring-rose-300 font-sans text-theme-text-main placeholder:text-theme-text-dim/80 transition-all duration-[300ms]"
+                    class="w-full pl-9 pr-8 py-2 rounded-2xl bg-white/70 border border-rose-100/80 text-xs focus:outline-none focus:ring-2 focus:ring-rose-300 font-sans text-theme-text-main placeholder:text-theme-text-dim/80 transition-all duration-[300ms]"
                   />
                   <button
                     v-if="searchQuery"
@@ -123,7 +134,7 @@
                       'px-3 py-1 rounded-xl whitespace-nowrap transition-all duration-[300ms] font-medium text-xs',
                       selectedScenario === 'ALL'
                         ? 'bg-rose-500 text-white shadow-fluffy-sm'
-                        : 'bg-theme-secondary text-theme-text-muted hover:bg-rose-50 hover:text-rose-600'
+                        : 'bg-white/80 text-theme-text-muted hover:bg-rose-50 hover:text-rose-600'
                     ]"
                   >
                     全部场景 ({{ ruleStore.rules.length }})
@@ -136,7 +147,7 @@
                       'px-3 py-1 rounded-xl whitespace-nowrap transition-all duration-[300ms] font-medium text-xs',
                       selectedScenario === sc
                         ? 'bg-rose-500 text-white shadow-fluffy-sm'
-                        : 'bg-theme-secondary text-theme-text-muted hover:bg-rose-50 hover:text-rose-600'
+                        : 'bg-white/80 text-theme-text-muted hover:bg-rose-50 hover:text-rose-600'
                     ]"
                   >
                     {{ sc }}
@@ -157,11 +168,17 @@
           <!-- 下层：规则卡片图鉴墙 (Grid 瀑布流网格) -->
           <div class="space-y-4 pt-2">
             <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-sm font-bold text-theme-text-main uppercase tracking-wider flex items-center space-x-2">
-                  <span>📖 心法手札图鉴 ({{ filteredRules.length }})</span>
+              <!-- 手帐书签纸签底托 (如同贴在桌面上的温润标签纸，100% 锐利清晰且与环境融为一体) -->
+              <div class="inline-flex flex-col sm:flex-row sm:items-center sm:space-x-3 px-4 py-2 rounded-2xl bg-white/85 backdrop-blur-md border border-white/90 shadow-[0_4px_16px_rgba(225,120,115,0.06)]">
+                <h2 class="text-xs sm:text-sm font-bold text-theme-text-main flex items-center space-x-2">
+                  <span class="text-sm sm:text-base">📖</span>
+                  <span>心法手札图鉴</span>
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-rose-50 text-rose-600 border border-rose-200/80">
+                    {{ filteredRules.length }} 篇
+                  </span>
                 </h2>
-                <p class="text-xs text-theme-text-dim mt-0.5">
+                <span class="hidden sm:inline text-rose-200">|</span>
+                <p class="text-[11px] text-theme-text-muted mt-0.5 sm:mt-0 font-sans">
                   点击卡片任意区域，翻阅它在现实生活中的真实照见与辨思
                 </p>
               </div>
@@ -280,11 +297,19 @@ import RuleEditModal from './components/RuleEditModal.vue';
 import NotionImportModal from './components/NotionImportModal.vue';
 import DiagnosticSandbox from './components/DiagnosticSandbox.vue';
 import DeskCompanion from './components/DeskCompanion.vue';
+import studyBg from './assets/images/study-bg.png';
 
 import { useRuleStore } from './stores/ruleStore';
+import { useSettingsStore } from './stores/settingsStore';
 import { IfThenRule } from './types';
 
 const ruleStore = useRuleStore();
+const settingsStore = useSettingsStore();
+
+// 100% 本地直出全景背景：优先使用用户在设置中自定义的背景，默认直接使用本地 study-bg.png
+const currentBackground = computed(() => {
+  return settingsStore.globalBackgroundUrl || studyBg;
+});
 
 // 时序温情环境问候
 const timeGreeting = computed(() => {

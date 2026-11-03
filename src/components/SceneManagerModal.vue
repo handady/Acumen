@@ -22,6 +22,51 @@
 
       <!-- 内容区 -->
       <div class="p-6 space-y-6 overflow-y-auto flex-1">
+        <!-- 核心推荐：书房全景沉浸大背景 (与环境融为一体) -->
+        <div class="p-4 rounded-3xl bg-gradient-to-r from-apricot-50 via-rose-50 to-pink-50 border border-rose-200/90 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-base">🏞️</span>
+              <div>
+                <h3 class="text-xs font-bold text-theme-text-main">整页全景沉浸背景 (融景毛玻璃)</h3>
+                <p class="text-[11px] text-theme-text-muted">上传你在 GPT 中生成的杰作，让整个页面与环境无缝相融</p>
+              </div>
+            </div>
+
+            <button
+              v-if="settingsStore.globalBackgroundUrl"
+              type="button"
+              @click="handleResetGlobalBg"
+              class="text-[11px] text-rose-500 hover:text-rose-700 underline"
+            >
+              恢复默认风景
+            </button>
+          </div>
+
+          <div class="flex items-center space-x-2 text-xs">
+            <input
+              v-model="customBgUrl"
+              type="text"
+              placeholder="粘贴全景图片 URL 或点击右侧上传本地 AI 生图"
+              class="flex-1 px-3 py-2 rounded-xl bg-white border border-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-300 font-mono text-xs"
+            />
+            <label class="px-3.5 py-2 rounded-xl bg-rose-500 text-white font-medium hover:bg-rose-600 cursor-pointer shadow-sm flex items-center space-x-1.5 transition-all">
+              <Upload class="w-3.5 h-3.5" />
+              <span>上传 AI 新图</span>
+              <input type="file" accept="image/*" @change="handleGlobalBgUpload" class="hidden" />
+            </label>
+          </div>
+          <div v-if="customBgUrl" class="flex justify-end pt-1">
+            <button
+              type="button"
+              @click="applyGlobalBg"
+              class="px-3 py-1.5 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-medium shadow-sm"
+            >
+              应用为此 URL 背景
+            </button>
+          </div>
+        </div>
+
         <!-- 随机轮播模式开关 -->
         <div class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/80 flex items-center justify-between">
           <div class="flex items-center space-x-2.5">
@@ -194,9 +239,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { ref, reactive } from 'vue';
 import { Image, X, Shuffle, Plus, Upload } from 'lucide-vue-next';
 import { useScoutStore } from '../stores/scoutStore';
+import { useSettingsStore } from '../stores/settingsStore';
 
 defineProps<{
   isOpen: boolean;
@@ -207,6 +253,50 @@ const emit = defineEmits<{
 }>();
 
 const scoutStore = useScoutStore();
+const settingsStore = useSettingsStore();
+
+const customBgUrl = ref('');
+
+function applyGlobalBg() {
+  if (customBgUrl.value.trim()) {
+    const url = customBgUrl.value.trim();
+    if (typeof settingsStore.setGlobalBackground === 'function') {
+      settingsStore.setGlobalBackground(url);
+    } else {
+      settingsStore.globalBackgroundUrl = url;
+      localStorage.setItem('acumen_global_bg_v1', url);
+    }
+    customBgUrl.value = '';
+    alert('全景背景已更新！');
+  }
+}
+
+function handleGlobalBgUpload(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (!input.files || input.files.length === 0) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target?.result as string;
+    if (typeof settingsStore.setGlobalBackground === 'function') {
+      settingsStore.setGlobalBackground(dataUrl);
+    } else {
+      settingsStore.globalBackgroundUrl = dataUrl;
+      localStorage.setItem('acumen_global_bg_v1', dataUrl);
+    }
+    alert('🎉 全景背景上传成功！整页已与新环境融为一体。');
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleResetGlobalBg() {
+  if (typeof settingsStore.resetGlobalBackground === 'function') {
+    settingsStore.resetGlobalBackground();
+  } else {
+    settingsStore.globalBackgroundUrl = '';
+    localStorage.removeItem('acumen_global_bg_v1');
+  }
+}
 
 const newScene = reactive({
   name: '',

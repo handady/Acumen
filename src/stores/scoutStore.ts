@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import { ScoutSessionState, ScoutSceneTheme, WildEventItem } from '../types';
 import { initialScenes } from '../data/initialScenes';
@@ -12,9 +12,13 @@ export const useScoutStore = defineStore('scout', () => {
   const ruleStore = useRuleStore();
   const settingsStore = useSettingsStore();
 
-  // 场景列表持久化
+  // 场景列表持久化（若包含旧版 unsplash 树图，平滑迁移至最新的初始场景列表）
   const savedScenes = localStorage.getItem('acumen_scout_scenes_v1');
-  const scenes = ref<ScoutSceneTheme[]>(savedScenes ? JSON.parse(savedScenes) : initialScenes);
+  const needsMigration = !savedScenes || savedScenes.includes('photo-1518495973542-4542c06a5843') || !savedScenes.includes('scene-study-desk');
+  const scenes = ref<ScoutSceneTheme[]>(needsMigration ? initialScenes : JSON.parse(savedScenes));
+  if (needsMigration) {
+    localStorage.setItem('acumen_scout_scenes_v1', JSON.stringify(initialScenes));
+  }
 
   function persistScenes() {
     localStorage.setItem('acumen_scout_scenes_v1', JSON.stringify(scenes.value));
@@ -283,3 +287,7 @@ export const useScoutStore = defineStore('scout', () => {
     resetScenesToDefault
   };
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useScoutStore, import.meta.hot));
+}

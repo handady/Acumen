@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import { IfThenRule, RuleCase, CaseMatchType } from '../types';
 import { initialRules } from '../data/initialRules';
@@ -237,3 +237,7 @@ export const useRuleStore = defineStore('rules', () => {
     resetToDefault
   };
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useRuleStore, import.meta.hot));
+}

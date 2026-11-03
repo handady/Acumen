@@ -1,9 +1,22 @@
 import { ScoutSceneTheme } from '../types';
+import studyBg from '../assets/images/study-bg.png';
 
 export const initialScenes: ScoutSceneTheme[] = [
   {
+    id: 'scene-study-desk',
+    name: '📖 晨曦治愈书房',
+    backgroundUrl: studyBg,
+    characterUrl: '',
+    statusText: '探针在落地窗前静静品读心法，感悟真实生活智慧...',
+    tipsList: [
+      '小贴士：晨光正好，携带 1~3 篇待检验的心法出发采风吧！',
+      '探针正在记录窗外晨曦微光与心境的平和起伏...',
+      '正在从生活日常中捕捉心给定力、身知行止的真实印记...'
+    ]
+  },
+  {
     id: 'scene-sakura-market',
-    name: '🌸 绯樱赛博集市',
+    name: '🌸 绯樱集市漫步',
     backgroundUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80',
     characterUrl: '',
     statusText: '探针小助手正在集市熙攘人流中捕捉行为偏差...',
@@ -11,18 +24,6 @@ export const initialScenes: ScoutSceneTheme[] = [
       '小贴士：携带 NEAR-MISS 多的规则卡采风，更容易辨别高精度的认知边界！',
       '探针正在比对摊位老板的还价原话与博弈话术...',
       '正在从嘈杂的生活日常中提取高价值冲突切片...'
-    ]
-  },
-  {
-    id: 'scene-warm-radio',
-    name: '📻 暖阳治愈电台',
-    backgroundUrl: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=1200&q=80',
-    characterUrl: '',
-    statusText: '探针正在监听职场匿名树洞与困境调频广播...',
-    tipsList: [
-      '小贴士：真正的规则经得起复杂情境的反复打磨与反证！',
-      '电台正在接收来自深海数据中心的匿名周报吐槽...',
-      '探针记录下了一段关于“紧急需求”的对话音频...'
     ]
   },
   {

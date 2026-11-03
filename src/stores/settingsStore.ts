@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import { ApiSettings } from '../types';
 
@@ -21,6 +21,26 @@ export const useSettingsStore = defineStore('settings', () => {
   const showOnboardingBanner = ref<boolean>(
     localStorage.getItem('acumen_show_onboarding') !== 'false'
   );
+
+  // 全景沉浸式背景图：100% 默认优先直读本地打包的 study-bg.png
+  // 如果 localStorage 存有旧版默认在线大树图 (photo-1518495973542-4542c06a5843)，自动清理并切回本地
+  const storedBg = localStorage.getItem('acumen_global_bg_v1') || '';
+  const isOldTreeBg = storedBg.includes('photo-1518495973542-4542c06a5843');
+  if (isOldTreeBg) {
+    localStorage.removeItem('acumen_global_bg_v1');
+  }
+
+  const globalBackgroundUrl = ref<string>(isOldTreeBg ? '' : storedBg);
+
+  function setGlobalBackground(url: string) {
+    globalBackgroundUrl.value = url;
+    localStorage.setItem('acumen_global_bg_v1', url);
+  }
+
+  function resetGlobalBackground() {
+    globalBackgroundUrl.value = '';
+    localStorage.removeItem('acumen_global_bg_v1');
+  }
 
   // 保存设置并严格遵循安全模式
   function saveSettings(newSettings: Partial<ApiSettings>) {
@@ -81,10 +101,17 @@ export const useSettingsStore = defineStore('settings', () => {
     storageMode,
     authorName,
     showOnboardingBanner,
+    globalBackgroundUrl,
     maskedApiKey,
     isConfigured,
     saveSettings,
     clearApiKey,
-    setOnboardingBanner
+    setOnboardingBanner,
+    setGlobalBackground,
+    resetGlobalBackground
   };
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useSettingsStore, import.meta.hot));
+}
