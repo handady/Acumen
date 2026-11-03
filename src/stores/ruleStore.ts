@@ -28,47 +28,47 @@ export function calculateRuleLevel(rule: IfThenRule): LevelInfo {
   if (exp === 0) {
     return {
       level: 0,
-      label: 'Lv.0 未经实测',
+      label: '初拟心语 · 待漫步',
       exp,
       nextExp: 1,
       progressPercent: 0,
-      badgeClass: 'bg-zinc-100 text-zinc-500 border-zinc-200'
+      badgeClass: 'bg-stone-50 text-stone-500 border-stone-200/70'
     };
   } else if (exp <= 4) {
     return {
       level: 1,
-      label: 'Lv.1 初见端倪',
+      label: '初见真容',
       exp,
       nextExp: 5,
       progressPercent: Math.min(100, Math.round((exp / 4) * 100)),
-      badgeClass: 'bg-rose-50 text-rose-600 border-rose-200'
+      badgeClass: 'bg-rose-50 text-rose-600 border-rose-200/70'
     };
   } else if (exp <= 12) {
     return {
       level: 2,
-      label: 'Lv.2 边界成型',
+      label: '边界明晰',
       exp,
       nextExp: 13,
       progressPercent: Math.min(100, Math.round(((exp - 4) / (12 - 4)) * 100)),
-      badgeClass: 'bg-amber-50 text-amber-600 border-amber-200'
+      badgeClass: 'bg-apricot-50 text-apricot-600 border-apricot-200/80 font-medium'
     };
   } else if (exp <= 25) {
     return {
       level: 3,
-      label: 'Lv.3 实战校准',
+      label: '温润通透',
       exp,
       nextExp: 26,
       progressPercent: Math.min(100, Math.round(((exp - 12) / (25 - 12)) * 100)),
-      badgeClass: 'bg-emerald-50 text-emerald-600 border-emerald-200'
+      badgeClass: 'bg-sage-50 text-sage-600 border-sage-200/80 font-medium'
     };
   } else {
     return {
       level: 4,
-      label: 'Lv.4 铁律判例库',
+      label: '心法大成',
       exp,
       nextExp: exp,
       progressPercent: 100,
-      badgeClass: 'bg-purple-50 text-purple-600 border-purple-300 font-semibold shadow-sm'
+      badgeClass: 'bg-purple-50 text-purple-600 border-purple-200/80 font-semibold shadow-sm'
     };
   }
 }

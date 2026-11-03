@@ -1,137 +1,129 @@
 <template>
   <div
-    class="relative rounded-3xl bg-white border border-rose-100 hover:border-rose-300 shadow-fluffy-sm hover:shadow-fluffy-md transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+    class="relative rounded-3xl bg-white border border-rose-200/70 hover:border-rose-300/90 shadow-fluffy-sm hover:shadow-[0_18px_38px_-6px_rgba(225,120,115,0.13)] hover:-translate-y-1 active:translate-y-0 transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] [transform:translateZ(0)] [backface-visibility:hidden] flex flex-col justify-between overflow-hidden group"
   >
-    <!-- 卡片顶部背景微光条 -->
-    <div class="h-1.5 w-full bg-gradient-to-r from-rose-200 via-rose-300 to-pink-200"></div>
+    <!-- 卡片顶部温润双色纸签条 -->
+    <div class="h-1.5 w-full bg-gradient-to-r from-rose-200 via-apricot-200 to-pink-200"></div>
 
-    <!-- 卡片 Header -->
-    <div class="p-4 sm:p-5 border-b border-rose-50 flex items-start justify-between gap-2">
+    <!-- 卡片 Header (手帐章印风) -->
+    <div class="p-4 sm:p-5 border-b border-rose-100/60 flex items-start justify-between gap-2 bg-gradient-to-b from-rose-50/20 to-transparent">
       <div>
         <div class="flex items-center space-x-2">
-          <span class="font-mono font-extrabold text-base text-rose-600 tracking-tight">
+          <span class="font-mono font-bold text-base text-rose-600 tracking-tight">
             {{ rule.id }}
           </span>
-          <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-600 border border-rose-100">
+          <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200/60">
             {{ rule.scenario || '通用认知' }}
           </span>
           <span class="text-[11px] text-theme-text-dim">
-            @{{ rule.author || 'Commander' }}
+            @{{ rule.author || '随笔者' }}
           </span>
         </div>
       </div>
 
-      <!-- 右侧等级徽章与经验条 -->
+      <!-- 右侧印章式等级徽章 -->
       <div class="flex flex-col items-end">
         <span
           :class="[
-            'px-2.5 py-0.5 rounded-full text-[11px] font-medium border font-mono',
+            'px-2.5 py-0.5 rounded-full text-[11px] border font-sans',
             levelInfo.badgeClass
           ]"
         >
           {{ levelInfo.label }}
         </span>
-        <div class="w-20 bg-rose-100 rounded-full h-1 mt-1.5 overflow-hidden">
-          <div
-            class="bg-gradient-to-r from-rose-400 to-rose-600 h-1 rounded-full transition-all duration-500"
-            :style="{ width: `${levelInfo.progressPercent}%` }"
-          ></div>
-        </div>
-        <span class="text-[10px] text-theme-text-dim font-mono mt-0.5">
-          {{ levelInfo.exp }} EXP
+        <span class="text-[10px] text-theme-text-dim mt-0.5 font-sans">
+          已集 {{ rule.cases.length }} 条生活印记
         </span>
       </div>
     </div>
 
-    <!-- 卡片 Body（点击唤出详情） -->
+    <!-- 卡片 Body（手帐便签层级，点击唤出详情） -->
     <div
       @click="$emit('open-detail', rule.id)"
-      class="p-4 sm:p-5 flex-1 space-y-3 cursor-pointer hover:bg-rose-50/20 transition-colors"
-      title="点击查看所有挂载判例详情与分享"
+      class="p-4 sm:p-5 flex-1 space-y-3 cursor-pointer hover:bg-rose-50/15 transition-colors"
+      title="点击翻阅所有挂载的生活印记详情"
     >
-      <!-- IF 触发条件 -->
-      <div class="space-y-1">
-        <div class="text-[11px] font-bold text-rose-500 font-mono tracking-wider flex items-center space-x-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-          <span>IF（触发条件）</span>
+      <!-- 便签层 1：遇境之时 (IF) -->
+      <div class="p-3 rounded-2xl bg-[#fef8f6] border border-rose-100/80 space-y-1">
+        <div class="text-[11px] font-medium text-rose-600 flex items-center space-x-1.5">
+          <span>🌱</span>
+          <span>遇境之时</span>
         </div>
-        <p class="text-xs sm:text-sm font-semibold text-theme-text-main leading-snug">
+        <p class="text-xs sm:text-sm font-medium text-theme-text-main leading-relaxed">
           {{ rule.ifCondition }}
         </p>
       </div>
 
-      <!-- THEN 应对动作 -->
-      <div class="space-y-1">
-        <div class="text-[11px] font-bold text-emerald-600 font-mono tracking-wider flex items-center space-x-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          <span>THEN（执行动作 / 认知定位）</span>
+      <!-- 便签层 2：心定处 (THEN) -->
+      <div class="p-3 rounded-2xl bg-white border border-rose-100/70 shadow-sm space-y-1">
+        <div class="text-[11px] font-medium text-sage-600 flex items-center space-x-1.5">
+          <span>🍵</span>
+          <span>心定处</span>
         </div>
         <p class="text-xs text-theme-text-muted leading-relaxed">
           {{ rule.thenAction }}
         </p>
       </div>
 
-      <!-- WHY 底层机制与置信度 -->
-      <div class="pt-2 border-t border-rose-50 flex items-start justify-between gap-2 text-xs">
-        <div class="text-[11px] text-theme-text-dim line-clamp-2">
-          <strong class="text-theme-text-muted">底层机制：</strong>{{ rule.whyMechanism }}
-        </div>
-        <span class="flex-shrink-0 text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600">
-          置信度 {{ rule.probability || '85%' }}
-        </span>
+      <!-- 底蕴机理 (WHY) -->
+      <div class="pt-1.5 text-[11px] text-theme-text-dim leading-relaxed line-clamp-2 px-1">
+        <span class="text-rose-400 font-serif">“</span>
+        <span>{{ rule.whyMechanism }}</span>
+        <span class="text-rose-400 font-serif">”</span>
       </div>
     </div>
 
-    <!-- 卡片 Footer -->
-    <div class="px-4 py-3 bg-rose-50/30 border-t border-rose-100/80 flex items-center justify-between gap-2">
-      <!-- 判例三色计数徽章 -->
-      <div class="flex items-center space-x-1 sm:space-x-1.5">
+    <!-- 卡片 Footer (小巧生活印记与布袋携带) -->
+    <div class="px-4 py-3 bg-gradient-to-b from-transparent to-rose-50/40 border-t border-rose-100/60 flex items-center justify-between gap-2">
+      <!-- 三色温和印记计数 -->
+      <div class="flex items-center space-x-1.5 text-[11px]">
         <span
-          class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-mono"
-          title="完全命中判例数"
+          class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-sage-50 text-sage-700 border border-sage-200/80 text-[10px]"
+          title="完全吻合印记"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          <span>{{ applyCount }}</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-sage-500"></span>
+          <span>{{ applyCount }} 命中</span>
         </span>
 
         <span
-          class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-mono"
-          title="近似误判反例数（机制不匹配）"
+          class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-apricot-50 text-apricot-700 border border-apricot-200/80 text-[10px]"
+          title="高精度辨析反例"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-          <span>{{ nearMissCount }}</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-apricot-500"></span>
+          <span>{{ nearMissCount }} 辨思</span>
         </span>
 
         <span
-          class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 text-[11px] font-mono"
-          title="信息不足待定数"
+          v-if="uncertainCount > 0"
+          class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-stone-50 text-stone-600 border border-stone-200 text-[10px]"
+          title="待定印记"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
-          <span>{{ uncertainCount }}</span>
+          <span>{{ uncertainCount }} 待探</span>
         </span>
       </div>
 
-      <!-- 装入探针行囊按钮 -->
+      <!-- 随身携带按钮 -->
       <button
         type="button"
         @click.stop="toggleEquip"
         :class="[
-          'px-3 py-1.5 rounded-xl text-xs font-medium flex items-center space-x-1 transition-all',
+          'px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center space-x-1.5 transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] transform active:scale-95',
+          isPopping ? 'animate-stamp' : '',
           isEquipped
-            ? 'bg-rose-500 text-white shadow-sm hover:bg-rose-600'
-            : 'bg-white border border-rose-200 text-rose-600 hover:bg-rose-50'
+            ? 'bg-gradient-to-r from-rose-400 to-rose-500 text-white shadow-sm'
+            : 'bg-white border border-rose-200/80 text-rose-600 hover:bg-rose-50/70 hover:border-rose-300'
         ]"
       >
-        <Radio class="w-3.5 h-3.5" :class="{ 'animate-pulse': isEquipped }" />
-        <span>{{ isEquipped ? '已装载' : '装入行囊' }}</span>
+        <Compass class="w-3.5 h-3.5" :class="{ 'animate-spin': isEquipped }" />
+        <span>{{ isEquipped ? '已入布袋' : '随身携带' }}</span>
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Radio } from 'lucide-vue-next';
+import { ref, computed } from 'vue';
+import { Compass } from 'lucide-vue-next';
 import { IfThenRule } from '../types';
 import { calculateRuleLevel } from '../stores/ruleStore';
 import { useScoutStore } from '../stores/scoutStore';
@@ -145,6 +137,7 @@ const emit = defineEmits<{
 }>();
 
 const scoutStore = useScoutStore();
+const isPopping = ref(false);
 
 const levelInfo = computed(() => calculateRuleLevel(props.rule));
 
@@ -155,6 +148,10 @@ const uncertainCount = computed(() => props.rule.cases.filter(c => c.matchType =
 const isEquipped = computed(() => scoutStore.isEquipped(props.rule.id));
 
 function toggleEquip() {
+  isPopping.value = true;
   scoutStore.toggleEquipRule(props.rule.id);
+  setTimeout(() => {
+    isPopping.value = false;
+  }, 350);
 }
 </script>

@@ -6,45 +6,53 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --font-mono: 'JetBrains Mono', Consolas, Monaco, monospace;
 
-  /* Soft Crimson / Pale Warm Red (淡绯暖红·舒心治愈系) - Pure Light Pink Mode */
-  --bg-primary: #fffafa;
-  --bg-secondary: #fdf5f5;
-  --bg-surface: rgba(255, 255, 255, 0.94);
-  --bg-surface-hover: #ffffff;
-  --bg-card-header: rgba(254, 242, 242, 0.7);
-  --border-color: rgba(239, 68, 68, 0.12);
-  --border-hover: rgba(239, 68, 68, 0.32);
+  /* 温润奶油甜桃·纸质质感 (Warm Creamy Milk-Tea & Sweet Peach) */
+  --bg-primary: #fdf8f7;
+  --bg-secondary: #fbf2f0;
+  --bg-surface: #ffffff;
+  --bg-surface-soft: rgba(255, 255, 255, 0.85);
+  --bg-card-header: rgba(253, 242, 240, 0.75);
+  --border-color: rgba(235, 172, 168, 0.25);
+  --border-hover: rgba(235, 140, 135, 0.45);
 
-  --text-main: #2a1a1b;
-  --text-muted: #7d6466;
-  --text-dim: #ab9496;
+  /* 温润可可棕文字 */
+  --text-main: #3e2b2d;
+  --text-muted: #7a6365;
+  --text-dim: #a68e90;
 
+  /* 暖桃主色与柔和渐变 */
   --accent-primary: #f87171;
   --accent-primary-hover: #ef4444;
-  --accent-gradient: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
-  --accent-glow: rgba(239, 68, 68, 0.14);
+  --accent-soft: #fde8e7;
+  --accent-gradient: linear-gradient(135deg, #fba1a1 0%, #f87171 100%);
+  --accent-glow: rgba(248, 113, 113, 0.12);
 
-  /* 云朵软影系统 (Soft Fluffy Shadows - 治愈系) */
-  --shadow-sm: 0 2px 8px rgba(239, 68, 68, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 8px 24px -4px rgba(239, 68, 68, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
-  --shadow-lg: 0 20px 40px -8px rgba(239, 68, 68, 0.08), 0 6px 14px -2px rgba(0, 0, 0, 0.02);
-  --shadow-glow: 0 0 24px rgba(239, 68, 68, 0.18);
+  /* 云朵软影系统 (Soft Fluffy Shadows - 治愈无压感) */
+  --shadow-sm: 0 2px 10px rgba(225, 120, 115, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 10px 28px -4px rgba(225, 120, 115, 0.07), 0 3px 8px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 22px 46px -8px rgba(225, 120, 115, 0.09), 0 8px 16px -2px rgba(0, 0, 0, 0.02);
+  --shadow-glow: 0 0 28px rgba(248, 113, 113, 0.15);
 
   /* 治愈系圆润圆角 */
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 34px;
   --radius-full: 9999px;
 
-  --badge-bg: rgba(239, 68, 68, 0.08);
-  --badge-text: #dc2626;
+  /* 柔和治愈系状态色 */
+  --status-apply: #2d8a68;      /* 初春抹茶绿 / 鼠尾草色 */
+  --status-apply-bg: #edf7f2;
+  --status-near-miss: #c26d2d;  /* 温暖蜜桃橙 / 杏黄 */
+  --status-near-miss-bg: #fdf4ed;
+  --status-uncertain: #6f6377;  /* 柔雾紫灰 */
+  --status-uncertain-bg: #f7f3f8;
+  --status-event: #7b5294;      /* 丁香暖紫 */
+  --status-event-bg: #f7f1fa;
 
-  /* 状态颜色 */
-  --status-apply: #10b981;
-  --status-near-miss: #f59e0b;
-  --status-uncertain: #71717a;
-  --status-event: #8b5cf6;
+  /* 慢调温润手帐阻尼缓动 */
+  --ease-journal: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-journal: all 380ms var(--ease-journal);
 }
 
 *, *::before, *::after {
@@ -56,53 +64,61 @@ html, body {
   background-color: var(--bg-primary);
   color: var(--text-main);
   min-height: 100vh;
-  line-height: 1.6;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 保证动画过渡过程中的矢量字体永不模糊 */
+.group,
+.rounded-3xl {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Background Ambient Glow (Warm Soft Pink/Red) */
+/* Background Ambient Glow (Warm Soft Pink/Peach) */
 .ambient-glow {
   position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 960px;
-  height: 440px;
-  background: radial-gradient(circle, rgba(248, 113, 113, 0.09) 0%, rgba(254, 202, 202, 0.04) 45%, transparent 70%);
+  width: 1080px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(251, 161, 161, 0.12) 0%, rgba(254, 215, 215, 0.05) 50%, transparent 75%);
   pointer-events: none;
   z-index: 0;
-  filter: blur(48px);
+  filter: blur(56px);
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(248, 113, 113, 0.22);
   border-radius: var(--radius-full);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-primary);
 }
 
-/* Custom Soft Animations */
+/* 慢调温润动画 keyframes */
 @keyframes pulse-subtle {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
   }
 }
 
 .animate-float {
-  animation: pulse-subtle 3s ease-in-out infinite;
+  animation: pulse-subtle 4.5s ease-in-out infinite;
 }
 
 @keyframes radar-sweep {
@@ -115,18 +131,100 @@ html, body {
 }
 
 .animate-radar {
-  animation: radar-sweep 4s linear infinite;
+  animation: radar-sweep 5s linear infinite;
 }
 
-/* 玻璃拟态与柔和边框 */
-.glass-panel {
-  background: var(--bg-surface);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+/* 飘窗内部专属：落樱微风慢飘动效 (GPU合成，完全无负担) */
+@keyframes petal-fall-1 {
+  0% {
+    transform: translate3d(0, -10px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(60px, 180px, 0) rotate(180deg);
+    opacity: 0;
+  }
 }
 
-.glass-panel:hover {
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-md);
+@keyframes petal-fall-2 {
+  0% {
+    transform: translate3d(0, -10px, 0) rotate(20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.75;
+  }
+  80% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate3d(-50px, 170px, 0) rotate(240deg);
+    opacity: 0;
+  }
+}
+
+@keyframes petal-fall-3 {
+  0% {
+    transform: translate3d(0, -10px, 0) rotate(-15deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.9;
+  }
+  75% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(40px, 190px, 0) rotate(160deg);
+    opacity: 0;
+  }
+}
+
+.petal-drift-1 {
+  animation: petal-fall-1 7s ease-in-out infinite;
+}
+.petal-drift-2 {
+  animation: petal-fall-2 9s ease-in-out infinite;
+}
+.petal-drift-3 {
+  animation: petal-fall-3 8s ease-in-out infinite;
+}
+
+/* 盖印章弹簧微感 (Stamp pop animation) */
+@keyframes stamp-pop {
+  0% {
+    transform: scale(0.92);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-stamp {
+  animation: stamp-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 页面切换平滑淡入过渡 */
+.journal-fade-enter-active,
+.journal-fade-leave-active {
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.journal-fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.journal-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }

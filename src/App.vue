@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-theme-primary text-theme-text-main flex flex-col relative selection:bg-rose-200 selection:text-rose-900">
-    <!-- 背景柔和光晕 (Ambient Warm Soft Pink Glow) -->
+  <div class="min-h-screen bg-theme-primary text-theme-text-main flex flex-col relative selection:bg-rose-100 selection:text-rose-800">
+    <!-- 背景柔和光晕 (Ambient Warm Soft Peach Glow) -->
     <div class="ambient-glow"></div>
 
     <!-- 顶部全局导航栏 -->
@@ -13,195 +13,195 @@
     />
 
     <!-- 主体容器 -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 z-10">
-      <!-- 顶部 30 秒上手无侵入式指引横幅 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 z-10 space-y-7">
+      <!-- 顶部 30 秒上手指引卡（轻量温润，可随时收起） -->
       <OnboardingBanner />
 
-      <!-- 工作区 A：规则图鉴与探针巡逻大厅 -->
-      <div v-if="activeTab === 'deck'" class="space-y-8">
-        <!-- 顶层并排分栏：左侧数据与快捷操作 + 右侧 16:9 采风探针视窗 -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <!-- 左侧：认知资产看板与快捷工具 (占 7 列) -->
-          <div class="lg:col-span-7 space-y-4">
-            <!-- 资产看板卡片 -->
-            <div class="p-6 rounded-3xl bg-white border border-rose-100 shadow-fluffy-sm space-y-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h1 class="text-xl sm:text-2xl font-bold text-theme-text-main tracking-tight font-sans">
-                    If-Then 认知判例库
-                  </h1>
-                  <p class="text-xs text-theme-text-muted mt-1">
-                    卡片等级与置信度由真实世界判例铸就 · 拒绝未经实测的空想假设
-                  </p>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 shadow-sm">
-                  <Shield class="w-6 h-6" />
-                </div>
-              </div>
-
-              <!-- 数据统计指标 -->
-              <div class="grid grid-cols-3 gap-3 pt-2 text-xs">
-                <div class="p-3 rounded-2xl bg-rose-50/50 border border-rose-100">
-                  <span class="text-theme-text-dim block">总规则档案</span>
-                  <div class="text-xl sm:text-2xl font-extrabold font-mono text-rose-600 mt-0.5">
-                    {{ ruleStore.totalRulesCount }}
+      <!-- 工作区切换：慢调温润手帐阻尼淡入淡出 -->
+      <Transition name="journal-fade" mode="out-in">
+        <!-- 工作区 A：规则图鉴与探针漫步大厅 -->
+        <div v-if="activeTab === 'deck'" key="deck" class="space-y-8">
+          <!-- 顶层主舞台：左右严格等高对齐 (items-stretch) -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <!-- 左侧：治愈书房心境与随思总览 (占 7 列，高度自适应与右侧飘窗拉齐) -->
+            <div class="lg:col-span-7 flex flex-col justify-between p-6 rounded-3xl bg-white border border-rose-200/70 shadow-fluffy-sm hover:shadow-[0_12px_30px_rgba(225,120,115,0.06)] transition-all duration-[380ms] ease-[cubic-bezier(0.16,1,0.3,1)] space-y-5">
+              <!-- 上部：问候语与生活总览 -->
+              <div class="space-y-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <div class="flex items-center space-x-2 text-rose-500 text-xs font-medium mb-1">
+                      <span>{{ timeGreeting.icon }}</span>
+                      <span>{{ timeGreeting.text }}</span>
+                    </div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-theme-text-main tracking-tight font-sans">
+                      If-Then 认知心法手札
+                    </h1>
+                    <p class="text-xs text-theme-text-muted mt-1 leading-relaxed">
+                      每一条心法都经受过真实生活的印证 · 拒绝未经省察的自欺与虚妄
+                    </p>
                   </div>
+
+                  <!-- 桌面拟物生活摆件与守护神兽（热茶、绿植、小萌虎/小金狮） -->
+                  <DeskCompanion />
                 </div>
 
-                <div class="p-3 rounded-2xl bg-emerald-50/50 border border-emerald-100">
-                  <span class="text-theme-text-dim block">已实测判例总数</span>
-                  <div class="text-xl sm:text-2xl font-extrabold font-mono text-emerald-600 mt-0.5">
-                    {{ ruleStore.totalCasesCount }}
-                  </div>
+                <!-- 诗意温和的生活小结条 (告别冰冷数字大方框) -->
+                <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                  <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-rose-50/70 border border-rose-100 text-rose-700">
+                    <span>📖</span>
+                    <span><strong>{{ ruleStore.totalRulesCount }}</strong> 篇珍藏心法</span>
+                  </span>
+
+                  <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-sage-50 border border-sage-100 text-sage-700">
+                    <span>🌱</span>
+                    <span><strong>{{ ruleStore.totalCasesCount }}</strong> 次生活映照</span>
+                  </span>
+
+                  <span class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-2xl bg-apricot-50 border border-apricot-100 text-apricot-700">
+                    <span>🕊️</span>
+                    <span>探针采风 {{ ruleStore.scoutCasesCount }} / 随笔 {{ ruleStore.manualCasesCount }}</span>
+                  </span>
                 </div>
 
-                <div class="p-3 rounded-2xl bg-amber-50/50 border border-amber-100">
-                  <span class="text-theme-text-dim block">探针带回 / 手动</span>
-                  <div class="text-base sm:text-lg font-bold font-mono text-amber-700 mt-1">
-                    {{ ruleStore.scoutCasesCount }} / {{ ruleStore.manualCasesCount }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- 快捷操作按钮组 -->
-              <div class="pt-2 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  @click="openCreateRuleModal"
-                  class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-400 to-rose-500 text-white font-medium text-xs shadow-fluffy-sm hover:from-rose-500 hover:to-rose-600 flex items-center space-x-1.5 transition-all"
-                >
-                  <Plus class="w-4 h-4" />
-                  <span>新增规则档案卡</span>
-                </button>
-
-                <button
-                  type="button"
-                  @click="showNotionModal = true"
-                  class="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 font-medium text-xs flex items-center space-x-1.5 shadow-sm transition-all"
-                >
-                  <ClipboardList class="w-4 h-4" />
-                  <span>Notion 批量粘贴导入</span>
-                </button>
-
-                <button
-                  type="button"
-                  @click="handleExportBackup"
-                  class="px-3.5 py-2 rounded-xl bg-theme-secondary border border-rose-100 text-theme-text-muted hover:text-theme-text-main hover:bg-rose-50 font-medium text-xs flex items-center space-x-1.5 transition-all"
-                >
-                  <Download class="w-3.5 h-3.5" />
-                  <span>备份导出</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- 搜索与场景分类过滤器 -->
-            <div class="p-4 rounded-2xl bg-white border border-rose-100 shadow-fluffy-sm space-y-3">
-              <div class="flex items-center space-x-3">
-                <!-- 搜索输入框 -->
-                <div class="relative flex-1">
-                  <Search class="w-4 h-4 text-theme-text-dim absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    v-model="searchQuery"
-                    type="text"
-                    placeholder="搜索规则编号、条件、动作或底层机制..."
-                    class="w-full pl-9 pr-3 py-2 rounded-xl bg-theme-secondary border border-rose-100 text-xs focus:outline-none focus:ring-2 focus:ring-rose-300 font-sans"
-                  />
+                <!-- 快捷操作栏 -->
+                <div class="flex flex-wrap items-center gap-2 pt-1">
                   <button
-                    v-if="searchQuery"
-                    @click="searchQuery = ''"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-theme-text-dim hover:text-theme-text-main"
+                    type="button"
+                    @click="openCreateRuleModal"
+                    class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-400 via-rose-500 to-pink-500 text-white font-medium text-xs shadow-fluffy-sm hover:from-rose-500 hover:to-pink-600 flex items-center space-x-1.5 transition-all duration-[350ms] transform hover:scale-[1.02] active:scale-95"
                   >
-                    <X class="w-3.5 h-3.5" />
+                    <Plus class="w-4 h-4" />
+                    <span>记录一条新心法</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    @click="showNotionModal = true"
+                    class="px-3.5 py-2 rounded-2xl bg-white border border-rose-200/80 text-rose-600 hover:bg-rose-50 font-medium text-xs flex items-center space-x-1.5 shadow-sm transition-all duration-[350ms] transform hover:scale-[1.02] active:scale-95"
+                  >
+                    <ClipboardList class="w-4 h-4" />
+                    <span>Notion 批量导入</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    @click="handleExportBackup"
+                    class="px-3.5 py-2 rounded-2xl bg-theme-secondary border border-rose-100 text-theme-text-muted hover:text-theme-text-main hover:bg-rose-50 font-medium text-xs flex items-center space-x-1.5 transition-all duration-[350ms] transform hover:scale-[1.02] active:scale-95"
+                  >
+                    <Download class="w-3.5 h-3.5" />
+                    <span>备份手札</span>
                   </button>
                 </div>
               </div>
 
-              <!-- 场景分类标签栏 -->
-              <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
-                <button
-                  type="button"
-                  @click="selectedScenario = 'ALL'"
-                  :class="[
-                    'px-3 py-1 rounded-xl whitespace-nowrap transition-all font-medium',
-                    selectedScenario === 'ALL'
-                      ? 'bg-rose-500 text-white shadow-fluffy-sm'
-                      : 'bg-theme-secondary text-theme-text-muted hover:bg-rose-50 hover:text-rose-600'
-                  ]"
-                >
-                  全部场景 ({{ ruleStore.rules.length }})
-                </button>
-                <button
-                  v-for="sc in ruleStore.allScenarios"
-                  :key="sc"
-                  @click="selectedScenario = sc"
-                  :class="[
-                    'px-3 py-1 rounded-xl whitespace-nowrap transition-all font-medium',
-                    selectedScenario === sc
-                      ? 'bg-rose-500 text-white shadow-fluffy-sm'
-                      : 'bg-theme-secondary text-theme-text-muted hover:bg-rose-50 hover:text-rose-600'
-                  ]"
-                >
-                  {{ sc }}
-                </button>
+              <!-- 下部：内嵌搜索栏与场景分类胶囊 -->
+              <div class="pt-4 border-t border-rose-100/70 space-y-3">
+                <!-- 搜索框 -->
+                <div class="relative">
+                  <Search class="w-4 h-4 text-theme-text-dim absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="轻轻翻寻某条心法、困惑、或是生活解法..."
+                    class="w-full pl-9 pr-8 py-2 rounded-2xl bg-theme-secondary/90 border border-rose-100/80 text-xs focus:outline-none focus:ring-2 focus:ring-rose-300 font-sans text-theme-text-main placeholder:text-theme-text-dim/80 transition-all duration-[300ms]"
+                  />
+                  <button
+                    v-if="searchQuery"
+                    @click="searchQuery = ''"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-theme-text-dim hover:text-theme-text-main transition-colors"
+                  >
+                    <X class="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <!-- 场景分类标签栏 -->
+                <div class="flex items-center space-x-1.5 overflow-x-auto pb-0.5 text-xs">
+                  <button
+                    type="button"
+                    @click="selectedScenario = 'ALL'"
+                    :class="[
+                      'px-3 py-1 rounded-xl whitespace-nowrap transition-all duration-[300ms] font-medium text-xs',
+                      selectedScenario === 'ALL'
+                        ? 'bg-rose-500 text-white shadow-fluffy-sm'
+                        : 'bg-theme-secondary text-theme-text-muted hover:bg-rose-50 hover:text-rose-600'
+                    ]"
+                  >
+                    全部场景 ({{ ruleStore.rules.length }})
+                  </button>
+                  <button
+                    v-for="sc in ruleStore.allScenarios"
+                    :key="sc"
+                    @click="selectedScenario = sc"
+                    :class="[
+                      'px-3 py-1 rounded-xl whitespace-nowrap transition-all duration-[300ms] font-medium text-xs',
+                      selectedScenario === sc
+                        ? 'bg-rose-500 text-white shadow-fluffy-sm'
+                        : 'bg-theme-secondary text-theme-text-muted hover:bg-rose-50 hover:text-rose-600'
+                    ]"
+                  >
+                    {{ sc }}
+                  </button>
+                </div>
               </div>
+            </div>
+
+            <!-- 右侧：采风飘窗组件 (占 5 列，与左侧面板高度精确拉齐) -->
+            <div class="lg:col-span-5 flex flex-col justify-between">
+              <ScoutWidget
+                @open-scenes="showSceneModal = true"
+                @open-report="showReportModal = true"
+              />
             </div>
           </div>
 
-          <!-- 右侧：旗帜级 16:9 采风探针视窗组件 (占 5 列) -->
-          <div class="lg:col-span-5">
-            <ScoutWidget
-              @open-scenes="showSceneModal = true"
-              @open-report="showReportModal = true"
-            />
-          </div>
-        </div>
+          <!-- 下层：规则卡片图鉴墙 (Grid 瀑布流网格) -->
+          <div class="space-y-4 pt-2">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-sm font-bold text-theme-text-main uppercase tracking-wider flex items-center space-x-2">
+                  <span>📖 心法手札图鉴 ({{ filteredRules.length }})</span>
+                </h2>
+                <p class="text-xs text-theme-text-dim mt-0.5">
+                  点击卡片任意区域，翻阅它在现实生活中的真实照见与辨思
+                </p>
+              </div>
+            </div>
 
-        <!-- 下层：规则卡片图鉴墙 (Grid 瀑布流网格) -->
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-bold text-theme-text-main uppercase tracking-wider flex items-center space-x-1.5">
-              <Layers class="w-4 h-4 text-rose-500" />
-              <span>规则卡片图鉴墙 ({{ filteredRules.length }})</span>
-            </h2>
-            <span class="text-xs text-theme-text-dim">
-              点击卡片任意区域展开判例实证与导出
-            </span>
-          </div>
-
-          <div
-            v-if="filteredRules.length > 0"
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-          >
-            <RuleCard
-              v-for="rule in filteredRules"
-              :key="rule.id"
-              :rule="rule"
-              @open-detail="openRuleDetail"
-            />
-          </div>
-
-          <!-- 无匹配规则 -->
-          <div
-            v-else
-            class="py-16 text-center rounded-3xl bg-white border border-rose-100 shadow-fluffy-sm space-y-3"
-          >
-            <FileQuestion class="w-10 h-10 text-rose-300 mx-auto" />
-            <p class="text-xs text-theme-text-muted">没有找到符合筛选条件的规则卡片</p>
-            <button
-              type="button"
-              @click="resetFilter"
-              class="px-4 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-medium hover:bg-rose-100"
+            <div
+              v-if="filteredRules.length > 0"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
             >
-              清除筛选条件
-            </button>
+              <RuleCard
+                v-for="rule in filteredRules"
+                :key="rule.id"
+                :rule="rule"
+                @open-detail="openRuleDetail"
+              />
+            </div>
+
+            <!-- 无匹配结果 -->
+            <div
+              v-else
+              class="py-16 text-center rounded-3xl bg-white border border-rose-100 shadow-fluffy-sm space-y-3"
+            >
+              <div class="text-3xl">🕊️</div>
+              <p class="text-xs text-theme-text-muted">没有找到符合筛选条件的心法便签</p>
+              <button
+                type="button"
+                @click="resetFilter"
+                class="px-4 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-medium hover:bg-rose-100"
+              >
+                清除翻寻条件
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- 工作区 B：主动事件诊断沙盒 -->
-      <div v-else-if="activeTab === 'sandbox'">
-        <DiagnosticSandbox />
-      </div>
+        <!-- 工作区 B：主动事件诊断沙盒 -->
+        <div v-else-if="activeTab === 'sandbox'" key="sandbox">
+          <DiagnosticSandbox />
+        </div>
+      </Transition>
     </main>
 
     <!-- 右下角常驻轻量「玩法速查手册」浮动胶囊 -->
@@ -209,11 +209,11 @@
       <button
         type="button"
         @click="showManualDrawer = true"
-        class="px-4 py-2.5 rounded-full bg-white/95 backdrop-blur-md border border-rose-200 text-rose-600 font-medium text-xs shadow-fluffy-md hover:bg-rose-50 hover:border-rose-300 flex items-center space-x-2 transition-all transform hover:scale-105"
-        title="打开新手玩法手册与规则说明"
+        class="px-4 py-2.5 rounded-full bg-white/95 backdrop-blur-md border border-rose-200/90 text-rose-600 font-medium text-xs shadow-fluffy-md hover:bg-rose-50 hover:border-rose-300 flex items-center space-x-2 transition-all transform hover:scale-105"
+        title="翻开玩法与心法手札手册"
       >
-        <HelpCircle class="w-4 h-4 text-rose-500" />
-        <span>💡 玩法手册</span>
+        <BookOpen class="w-4 h-4 text-rose-400" />
+        <span>💡 玩法与心法指引</span>
       </button>
     </div>
 
@@ -259,15 +259,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import {
-  Shield,
+  Feather,
   Plus,
   ClipboardList,
   Download,
   Search,
   X,
-  Layers,
-  FileQuestion,
-  HelpCircle
+  BookOpen
 } from 'lucide-vue-next';
 import HeaderNav from './components/HeaderNav.vue';
 import OnboardingBanner from './components/OnboardingBanner.vue';
@@ -281,11 +279,26 @@ import RuleDetailDrawer from './components/RuleDetailDrawer.vue';
 import RuleEditModal from './components/RuleEditModal.vue';
 import NotionImportModal from './components/NotionImportModal.vue';
 import DiagnosticSandbox from './components/DiagnosticSandbox.vue';
+import DeskCompanion from './components/DeskCompanion.vue';
 
 import { useRuleStore } from './stores/ruleStore';
 import { IfThenRule } from './types';
 
 const ruleStore = useRuleStore();
+
+// 时序温情环境问候
+const timeGreeting = computed(() => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 11) {
+    return { icon: '🌅', text: '清晨微光 · 煮一壶热茶，静心写下今日心法' };
+  } else if (hour >= 11 && hour < 17) {
+    return { icon: '☀️', text: '午后暖阳 · 窗外微风正好，小守护兽在身旁陪伴' };
+  } else if (hour >= 17 && hour < 21) {
+    return { icon: '🌇', text: '黄昏暮色 · 卸下一天的纷扰，复盘今日生活印记' };
+  } else {
+    return { icon: '🌙', text: '夜深灯温 · 守护神兽在身旁打盹，写完就早些安歇吧' };
+  }
+});
 
 // 导航选项卡
 const activeTab = ref<'deck' | 'sandbox'>('deck');
@@ -349,7 +362,7 @@ function handleExportBackup() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Acumen-Backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `Acumen-Rules-Backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

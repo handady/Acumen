@@ -168,111 +168,111 @@
             <!-- 1. EVENT 前因定性块 -->
             <div
               v-if="parsedResult.event"
-              class="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 text-xs space-y-1.5"
+              class="p-4 rounded-2xl bg-[#fbf7fd] border border-[#ebdcf5] text-xs space-y-1.5"
             >
-              <div class="font-bold text-purple-800 flex items-center justify-between">
+              <div class="font-bold text-[#7b5294] flex items-center justify-between">
                 <span class="flex items-center space-x-1.5">
-                  <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#9a6ebd]"></span>
                   <span>EVENT 定性：{{ parsedResult.event.cause }}</span>
                 </span>
-                <span v-if="parsedResult.event.causeSupplement" class="text-purple-600 font-normal">
+                <span v-if="parsedResult.event.causeSupplement" class="text-[#7b5294]/80 font-normal">
                   {{ parsedResult.event.causeSupplement }}
                 </span>
               </div>
-              <p class="text-purple-900/80 text-[11px] leading-relaxed pl-4">
+              <p class="text-[#59396e] text-[11px] leading-relaxed pl-4">
                 <strong>依据细节：</strong>{{ parsedResult.event.evidence }}
               </p>
             </div>
 
             <!-- 2. APPLY 完全命中列表 -->
             <div v-if="parsedResult.applyList.length > 0" class="space-y-2">
-              <span class="text-xs font-semibold text-emerald-700 flex items-center space-x-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>APPLY 命中项（规则适用，可收录挂载）</span>
+              <span class="text-xs font-semibold text-sage-700 flex items-center space-x-1.5">
+                <span class="w-2 h-2 rounded-full bg-sage-500"></span>
+                <span>APPLY 命中项（完全适用心法）</span>
               </span>
               <div
                 v-for="(item, idx) in parsedResult.applyList"
                 :key="idx"
-                class="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 text-xs flex items-start justify-between gap-3"
+                class="p-3.5 rounded-2xl bg-sage-50 border border-sage-200 text-xs flex items-start justify-between gap-3"
               >
                 <div class="space-y-1 flex-1">
-                  <div class="font-mono font-bold text-emerald-700 flex items-center space-x-2">
+                  <div class="font-mono font-bold text-sage-700 flex items-center space-x-2">
                     <span>{{ item.ruleId }}</span>
-                    <span v-if="item.quoteSnippet" class="text-[11px] font-sans text-emerald-800/80">
+                    <span v-if="item.quoteSnippet" class="text-[11px] font-sans text-sage-800/80">
                       「{{ item.quoteSnippet }}」
                     </span>
                   </div>
-                  <p class="text-emerald-900 text-[11px] leading-relaxed">{{ item.detail }}</p>
+                  <p class="text-sage-900 text-[11px] leading-relaxed">{{ item.detail }}</p>
                 </div>
 
                 <button
                   type="button"
                   @click="mountCase(item, 'APPLY')"
-                  class="flex-shrink-0 px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-medium text-[11px] hover:bg-emerald-700 shadow-sm transition-all"
+                  class="flex-shrink-0 px-3 py-1.5 rounded-xl bg-sage-600 text-white font-medium text-[11px] hover:bg-sage-700 shadow-sm transition-all"
                 >
-                  + 挂载到卡片 (+2 EXP)
+                  + 记入手札 (留存印记)
                 </button>
               </div>
             </div>
 
             <!-- 3. NEAR-MISS 近似误判列表 -->
             <div v-if="parsedResult.nearMissList.length > 0" class="space-y-2">
-              <span class="text-xs font-semibold text-amber-700 flex items-center space-x-1.5">
-                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                <span>NEAR-MISS 近似误判（表面相似但机制不符 · 高价值反例）</span>
+              <span class="text-xs font-semibold text-apricot-700 flex items-center space-x-1.5">
+                <span class="w-2 h-2 rounded-full bg-apricot-500"></span>
+                <span>NEAR-MISS 机理辨思（表面相似但机制不符 · 珍贵边界）</span>
               </span>
               <div
                 v-for="(item, idx) in parsedResult.nearMissList"
                 :key="idx"
-                class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs flex items-start justify-between gap-3"
+                class="p-3.5 rounded-2xl bg-apricot-50 border border-apricot-200 text-xs flex items-start justify-between gap-3"
               >
                 <div class="space-y-1 flex-1">
-                  <div class="font-mono font-bold text-amber-700 flex items-center space-x-2">
+                  <div class="font-mono font-bold text-apricot-700 flex items-center space-x-2">
                     <span>{{ item.ruleId }}</span>
-                    <span v-if="item.quoteSnippet" class="text-[11px] font-sans text-amber-800/80">
+                    <span v-if="item.quoteSnippet" class="text-[11px] font-sans text-apricot-800/80">
                       「{{ item.quoteSnippet }}」
                     </span>
                   </div>
-                  <p class="text-amber-900 text-[11px] leading-relaxed">{{ item.detail }}</p>
+                  <p class="text-apricot-900 text-[11px] leading-relaxed">{{ item.detail }}</p>
                 </div>
 
                 <button
                   type="button"
                   @click="mountCase(item, 'NEAR-MISS')"
-                  class="flex-shrink-0 px-3 py-1.5 rounded-xl bg-amber-600 text-white font-medium text-[11px] hover:bg-amber-700 shadow-sm transition-all"
+                  class="flex-shrink-0 px-3 py-1.5 rounded-xl bg-apricot-600 text-white font-medium text-[11px] hover:bg-apricot-700 shadow-sm transition-all"
                 >
-                  + 挂载到卡片 (+3 EXP)
+                  + 记入手札 (边界辨析)
                 </button>
               </div>
             </div>
 
             <!-- 4. UNCERTAIN 待定列表 -->
             <div v-if="parsedResult.uncertainList.length > 0" class="space-y-2">
-              <span class="text-xs font-semibold text-zinc-600 flex items-center space-x-1.5">
-                <span class="w-2 h-2 rounded-full bg-zinc-400"></span>
-                <span>UNCERTAIN 待定项</span>
+              <span class="text-xs font-semibold text-stone-600 flex items-center space-x-1.5">
+                <span class="w-2 h-2 rounded-full bg-stone-400"></span>
+                <span>UNCERTAIN 留白待定项</span>
               </span>
               <div
                 v-for="(item, idx) in parsedResult.uncertainList"
                 :key="idx"
-                class="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 text-xs flex items-start justify-between gap-3"
+                class="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 text-xs flex items-start justify-between gap-3"
               >
                 <div class="space-y-1 flex-1">
-                  <div class="font-mono font-bold text-zinc-700 flex items-center space-x-2">
+                  <div class="font-mono font-bold text-stone-700 flex items-center space-x-2">
                     <span>{{ item.ruleId }}</span>
-                    <span v-if="item.quoteSnippet" class="text-[11px] font-sans text-zinc-600">
+                    <span v-if="item.quoteSnippet" class="text-[11px] font-sans text-stone-600">
                       「{{ item.quoteSnippet }}」
                     </span>
                   </div>
-                  <p class="text-zinc-600 text-[11px] leading-relaxed">{{ item.detail }}</p>
+                  <p class="text-stone-600 text-[11px] leading-relaxed">{{ item.detail }}</p>
                 </div>
 
                 <button
                   type="button"
                   @click="mountCase(item, 'UNCERTAIN')"
-                  class="flex-shrink-0 px-3 py-1.5 rounded-xl bg-zinc-600 text-white font-medium text-[11px] hover:bg-zinc-700 shadow-sm transition-all"
+                  class="flex-shrink-0 px-3 py-1.5 rounded-xl bg-stone-600 text-white font-medium text-[11px] hover:bg-stone-700 shadow-sm transition-all"
                 >
-                  + 挂载到卡片 (+1 EXP)
+                  + 暂存留白
                 </button>
               </div>
             </div>
