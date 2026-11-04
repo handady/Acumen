@@ -268,6 +268,7 @@ import { Compass, Camera, RotateCw, RotateCcw, Trash2, BookOpen } from 'lucide-v
 import { IfThenRule } from '../types';
 import { calculateRuleLevel, useRuleStore } from '../stores/ruleStore';
 import { useScoutStore } from '../stores/scoutStore';
+import { uploadImageApi } from '../utils/api';
 
 const props = defineProps<{
   rule: IfThenRule;
@@ -300,22 +301,29 @@ function triggerUpload() {
   fileInputRef.value?.click();
 }
 
-function handleFileChange(e: Event) {
+async function handleFileChange(e: Event) {
   const target = e.target as HTMLInputElement;
   const file = target.files?.[0];
   if (!file) return;
 
-  if (file.size > 5 * 1024 * 1024) {
-    alert('请选择小于 5MB 的图片');
+  if (file.size > 10 * 1024 * 1024) {
+    alert('请选择小于 10MB 的图片');
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    const base64 = reader.result as string;
-    ruleStore.updateRule(props.rule.id, { coverImage: base64 });
-  };
-  reader.readAsDataURL(file);
+  // 优先上传到后端，保存轻量静态相对路径
+  const uploadedUrl = await uploadImageApi(file);
+  if (uploadedUrl) {
+    ruleStore.updateRule(props.rule.id, { coverImage: uploadedUrl });
+  } else {
+    // 后端不可用时降级使用本地 Base64
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      ruleStore.updateRule(props.rule.id, { coverImage: base64 });
+    };
+    reader.readAsDataURL(file);
+  }
 
   target.value = '';
 }

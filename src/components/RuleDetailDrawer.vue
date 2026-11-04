@@ -385,7 +385,8 @@ async function exportCardImage() {
   try {
     const dataUrl = await toPng(node, {
       pixelRatio: 2,
-      backgroundColor: '#fdf8f7'
+      backgroundColor: '#fdf8f7',
+      skipFonts: true
     });
     const a = document.createElement('a');
     a.href = dataUrl;

@@ -2,6 +2,15 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import { IfThenRule, RuleCase, CaseMatchType } from '../types';
 import { initialRules } from '../data/initialRules';
+import {
+  fetchRulesApi,
+  createRuleApi,
+  updateRuleApi,
+  deleteRuleApi,
+  addCaseApi,
+  deleteCaseApi,
+  syncRulesApi
+} from '../utils/api';
 
 export interface LevelInfo {
   level: number;
@@ -77,11 +86,33 @@ export const useRuleStore = defineStore('rules', () => {
   // 从 LocalStorage 加载或 fallback 到初始 Mock
   const saved = localStorage.getItem('acumen_rules_v1');
   const rules = ref<IfThenRule[]>(saved ? JSON.parse(saved) : initialRules);
+  const isServerOnline = ref(false);
 
-  // 响应式持久化保存
+  // 响应式持久化保存到 LocalStorage
   function persist() {
     localStorage.setItem('acumen_rules_v1', JSON.stringify(rules.value));
   }
+
+  // 异步初始化：从 SQLite 后端拉取最新数据，或将本地离线数据同步到数据库
+  async function initRulesFromBackend() {
+    try {
+      const backendRules = await fetchRulesApi();
+      if (backendRules && backendRules.length > 0) {
+        isServerOnline.value = true;
+        rules.value = backendRules;
+        persist();
+      } else if (backendRules && backendRules.length === 0 && rules.value.length > 0) {
+        // 数据库为空但本地有数据，自动全量同步至 SQLite
+        isServerOnline.value = true;
+        await syncRulesApi(rules.value);
+      }
+    } catch (e) {
+      console.warn('[ruleStore] 初始化后端数据失败:', e);
+    }
+  }
+
+  // 立即触发拉取
+  initRulesFromBackend();
 
   // 统计指标
   const totalRulesCount = computed(() => rules.value.length);
@@ -135,6 +166,7 @@ export const useRuleStore = defineStore('rules', () => {
 
     rules.value.unshift(newRule);
     persist();
+    createRuleApi(newRule);
     return newRule;
   }
 
@@ -144,6 +176,7 @@ export const useRuleStore = defineStore('rules', () => {
     if (idx !== -1) {
       rules.value[idx] = { ...rules.value[idx], ...updates };
       persist();
+      updateRuleApi(id, updates);
     }
   }
 
@@ -151,6 +184,7 @@ export const useRuleStore = defineStore('rules', () => {
   function deleteRule(id: string) {
     rules.value = rules.value.filter(r => r.id !== id);
     persist();
+    deleteRuleApi(id);
   }
 
   // 挂载判例到指定规则卡片
@@ -172,6 +206,7 @@ export const useRuleStore = defineStore('rules', () => {
 
     rule.cases.unshift(createdCase);
     persist();
+    addCaseApi(rule.id, createdCase);
     return createdCase;
   }
 
@@ -181,6 +216,7 @@ export const useRuleStore = defineStore('rules', () => {
     if (rule) {
       rule.cases = rule.cases.filter(c => c.id !== caseId);
       persist();
+      deleteCaseApi(caseId);
     }
   }
 
@@ -200,6 +236,12 @@ export const useRuleStore = defineStore('rules', () => {
       });
     }
     persist();
+    syncRulesApi(rules.value);
+  }
+
+  // 主动将当前全量数据同步至 SQLite 数据库
+  async function syncAllToDatabase() {
+    return await syncRulesApi(rules.value);
   }
 
   // 导出全量 JSON 备份
@@ -217,10 +259,12 @@ export const useRuleStore = defineStore('rules', () => {
   function resetToDefault() {
     rules.value = JSON.parse(JSON.stringify(initialRules));
     persist();
+    syncRulesApi(rules.value);
   }
 
   return {
     rules,
+    isServerOnline,
     totalRulesCount,
     totalCasesCount,
     manualCasesCount,
@@ -233,6 +277,7 @@ export const useRuleStore = defineStore('rules', () => {
     addCaseToRule,
     deleteCase,
     importRules,
+    syncAllToDatabase,
     exportJsonBackup,
     resetToDefault
   };

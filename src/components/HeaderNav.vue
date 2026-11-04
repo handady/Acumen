@@ -10,6 +10,14 @@
           <div class="flex items-center space-x-2">
             <span class="font-bold text-lg text-theme-text-main tracking-tight font-sans">Acumen</span>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-rose-100/80 text-rose-700 font-sans font-medium">温暖手札</span>
+            <span
+              v-if="ruleStore.isServerOnline"
+              class="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+              title="已连接本地 SQLite 单文件数据库 (server/data/acumen.db)"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>SQLite 已联机</span>
+            </span>
           </div>
           <p class="text-[11px] text-theme-text-muted hidden sm:block">If-Then 认知手札与生活漫步采风</p>
         </div>
@@ -88,6 +96,9 @@
 
 <script setup lang="ts">
 import { Heart, BookOpen, Sparkles, Compass, Settings } from 'lucide-vue-next';
+import { useRuleStore } from '../stores/ruleStore';
+
+const ruleStore = useRuleStore();
 
 defineProps<{
   activeTab: 'deck' | 'sandbox';
