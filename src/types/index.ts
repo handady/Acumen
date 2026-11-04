@@ -33,6 +33,7 @@ export interface IfThenRule {
   probability: string;            // 概率/置信度（如 "85%"）
   author: string;                 // 规则创作者署名
   cases: RuleCase[];              // 挂载在该规则下的真实判例集合
+  coverImage?: string;            // 拍立得封面图片（Base64 或图片链接）
 }
 
 // 5. 可热插拔的 AI 采风视觉主题场景 (Scout Visual Scene)

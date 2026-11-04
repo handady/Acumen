@@ -1,60 +1,65 @@
 <template>
-  <div v-if="rule" class="fixed inset-0 z-50 overflow-hidden">
+  <div v-if="rule" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 sm:p-6">
     <!-- 遮罩 -->
-    <div class="absolute inset-0 bg-black/35 backdrop-blur-sm transition-opacity" @click="$emit('close')"></div>
+    <div class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity" @click="$emit('close')"></div>
 
-    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-      <div class="w-screen max-w-2xl bg-white shadow-fluffy-lg border-l border-rose-100 flex flex-col">
-        <!-- 抽屉头部 -->
-        <div class="px-6 py-4 bg-gradient-to-r from-apricot-50 via-rose-50 to-pink-50 border-b border-rose-100 flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <span class="font-mono font-bold text-xl text-rose-600">{{ rule.id }}</span>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100/80 text-rose-700 border border-rose-200/60">
-              {{ rule.scenario }}
-            </span>
-            <span
-              v-if="levelInfo"
-              :class="['px-2.5 py-0.5 rounded-full text-xs font-sans font-medium border', levelInfo.badgeClass]"
-            >
-              {{ levelInfo.label }}
-            </span>
-          </div>
-
-          <div class="flex items-center space-x-2">
-            <!-- 导出分享图按钮 -->
-            <button
-              type="button"
-              @click="exportCardImage"
-              :disabled="isExporting"
-              class="px-3 py-1.5 rounded-2xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-medium flex items-center space-x-1.5 shadow-sm transition-all"
-            >
-              <Camera class="w-3.5 h-3.5" />
-              <span>{{ isExporting ? '生成中...' : '生成手札卡片图' }}</span>
-            </button>
-
-            <button
-              @click="$emit('close')"
-              class="p-1.5 rounded-xl text-theme-text-muted hover:text-theme-text-main hover:bg-rose-100 transition-colors"
-            >
-              <X class="w-5 h-5" />
-            </button>
-          </div>
+    <!-- 居中手札弹窗 -->
+    <div class="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-3xl shadow-fluffy-lg border border-rose-100 flex flex-col overflow-hidden z-10">
+      <!-- 弹窗头部 -->
+      <div class="px-6 py-4 bg-gradient-to-r from-apricot-50 via-rose-50 to-pink-50 border-b border-rose-100 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <span class="font-mono font-bold text-xl text-rose-600">{{ rule.id }}</span>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100/80 text-rose-700 border border-rose-200/60">
+            {{ rule.scenario }}
+          </span>
+          <span
+            v-if="levelInfo"
+            :class="['px-2.5 py-0.5 rounded-full text-xs font-sans font-medium border', levelInfo.badgeClass]"
+          >
+            {{ levelInfo.label }}
+          </span>
         </div>
 
-        <!-- 抽屉内容区（可滚动） -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
-          <!-- 规则卡片快照区（用于直接展示及 html-to-image 截图捕获） -->
-          <div id="rule-snapshot-container" class="p-6 rounded-3xl bg-gradient-to-b from-[#fef8f6] to-white border border-rose-200/80 shadow-sm space-y-4">
-            <!-- 遇境之时 -->
-            <div class="space-y-1">
-              <div class="text-xs font-medium text-rose-600 tracking-wider flex items-center space-x-1">
-                <span>🌱</span>
-                <span>遇境之时 (IF)</span>
-              </div>
-              <p class="text-sm font-semibold text-theme-text-main leading-relaxed">
-                {{ rule.ifCondition }}
-              </p>
+        <div class="flex items-center space-x-2">
+          <!-- 导出分享图按钮 -->
+          <button
+            type="button"
+            @click="exportCardImage"
+            :disabled="isExporting"
+            class="px-3 py-1.5 rounded-2xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-medium flex items-center space-x-1.5 shadow-sm transition-all"
+          >
+            <Camera class="w-3.5 h-3.5" />
+            <span>{{ isExporting ? '生成中...' : '生成手札卡片图' }}</span>
+          </button>
+
+          <button
+            @click="$emit('close')"
+            class="p-1.5 rounded-xl text-theme-text-muted hover:text-theme-text-main hover:bg-rose-100 transition-colors"
+          >
+            <X class="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      <!-- 弹窗内容区（可滚动） -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <!-- 规则卡片快照区（用于直接展示及 html-to-image 截图捕获） -->
+        <div id="rule-snapshot-container" class="p-6 rounded-3xl bg-gradient-to-b from-[#fef8f6] to-white border border-rose-200/80 shadow-sm space-y-4">
+          <!-- 拍立得生活封面（若存在） -->
+          <div v-if="rule.coverImage" class="w-full h-44 rounded-2xl overflow-hidden border border-rose-100 shadow-xs">
+            <img :src="rule.coverImage" :alt="rule.id" class="w-full h-full object-cover" />
+          </div>
+
+          <!-- 遇境之时 -->
+          <div class="space-y-1">
+            <div class="text-xs font-medium text-rose-600 tracking-wider flex items-center space-x-1">
+              <span>🌱</span>
+              <span>遇境之时 (IF)</span>
             </div>
+            <p class="text-sm font-semibold text-theme-text-main leading-relaxed">
+              {{ rule.ifCondition }}
+            </p>
+          </div>
 
             <!-- 心定处 -->
             <div class="space-y-1">
@@ -271,7 +276,7 @@
           </details>
         </div>
 
-        <!-- 抽屉底部 -->
+        <!-- 弹窗底部 -->
         <div class="px-6 py-4 bg-gray-50/50 border-t border-rose-100 flex items-center justify-between">
           <button
             type="button"
@@ -290,7 +295,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
