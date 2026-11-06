@@ -133,10 +133,27 @@
     <!-- 下部：极简温暖状态与大圆角胶囊操作按钮 (WorkBuddy 风格核心) -->
     <div class="space-y-3">
       <!-- 状态 A：待机 (IDLE) - 极简出行确认 -->
-      <div v-if="scoutStore.session.status === 'IDLE'" class="space-y-2.5">
+      <div v-if="scoutStore.session.status === 'IDLE' && !scoutStore.isSettling" class="space-y-2.5">
         <div class="flex items-center justify-between text-[11px] text-theme-text-muted px-1">
-          <span>随身携带了 {{ scoutStore.session.equippedRuleIds.length }} 篇心法</span>
-          <span class="text-rose-500 font-medium">⚡ 5秒快速采风</span>
+          <span class="truncate max-w-[150px] font-sans" :title="scoutStore.focusRule ? `本次专注心法: ${scoutStore.focusRule.id} ${scoutStore.focusRule.ifCondition}` : '暂无心法'">
+            🎯 专注探寻: <strong class="text-rose-600 font-mono">{{ scoutStore.focusRule?.id || '#001' }}</strong>
+          </span>
+          <div class="flex items-center space-x-1 bg-rose-50/60 p-0.5 rounded-lg border border-rose-100">
+            <button
+              v-for="dur in durationOptions"
+              :key="dur.minutes"
+              type="button"
+              @click="selectedDuration = dur.minutes"
+              :class="[
+                'px-1.5 py-0.5 rounded text-[10px] transition-colors',
+                selectedDuration === dur.minutes
+                  ? 'bg-rose-500 text-white font-medium shadow-xs'
+                  : 'text-theme-text-dim hover:text-rose-600'
+              ]"
+            >
+              {{ dur.label }}
+            </button>
+          </div>
         </div>
 
         <button
@@ -147,6 +164,17 @@
           <Send class="w-4 h-4" />
           <span>确定派出探针 · 漫步采风</span>
         </button>
+      </div>
+
+      <!-- 状态：归来结算中 (正在调取后端真实抓取与大模型研判) -->
+      <div v-else-if="scoutStore.isSettling" class="py-3 px-4 rounded-2xl bg-rose-50/70 border border-rose-100 text-center space-y-1.5">
+        <div class="flex items-center justify-center space-x-2 text-xs text-rose-600 font-bold">
+          <Sparkles class="w-4 h-4 text-rose-500 animate-spin" />
+          <span>小柴拾得切片，DeepSeek 严谨研判中...</span>
+        </div>
+        <p class="text-[10px] text-theme-text-dim">
+          正在依据 10 条硬约束做深层逻辑推演，约需 3~5 秒
+        </p>
       </div>
 
       <!-- 状态 B：采风中 (SCOUTING) - 沉静陪伴感倒计时 -->
@@ -187,6 +215,17 @@
           <BookOpen class="w-4 h-4 text-white" />
           <span>翻开生活手札 (感悟照见)</span>
         </button>
+
+        <!-- 不感兴趣时一键跳过，释放探针准备下一次出行 -->
+        <button
+          type="button"
+          @click="scoutStore.discardLoot()"
+          class="w-full py-1 text-center text-[11px] text-theme-text-dim hover:text-rose-600 transition-colors flex items-center justify-center space-x-1"
+          title="不收录此篇见闻，直接重置探针回到待机状态"
+        >
+          <RotateCcw class="w-3 h-3" />
+          <span>跳过此篇，重新准备出发</span>
+        </button>
       </div>
 
       <!-- 底部温暖小脚注 -->
@@ -205,7 +244,8 @@ import {
   Send,
   Coffee,
   Heart,
-  BookOpen
+  BookOpen,
+  RotateCcw
 } from 'lucide-vue-next';
 import { useScoutStore } from '../stores/scoutStore';
 
@@ -216,7 +256,15 @@ defineEmits<{
 
 const scoutStore = useScoutStore();
 
-// 默认 5 秒极速快速测试体验
+// 采风时长选项（支持极速体验与真实沉浸漫步）
+const durationOptions = [
+  { label: '5秒极速', minutes: 0.0833 },
+  { label: '15分钟', minutes: 15 },
+  { label: '30分钟', minutes: 30 }
+];
+const selectedDuration = ref(0.0833);
+
+// 倒计时
 const currentTime = ref(Date.now());
 let timerInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -245,6 +293,6 @@ const remainingTimeString = computed(() => {
 });
 
 function startScouting() {
-  scoutStore.launchScout(0.0833);
+  scoutStore.launchScout(selectedDuration.value);
 }
 </script>

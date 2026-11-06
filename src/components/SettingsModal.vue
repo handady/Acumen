@@ -140,6 +140,31 @@
                 </label>
               </div>
             </div>
+
+            <!-- 连通性实时检测 -->
+            <div class="pt-2 border-t border-rose-100/80">
+              <button
+                type="button"
+                @click="handleTestConnection"
+                :disabled="isTesting"
+                class="w-full py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-medium flex items-center justify-center space-x-1.5 transition-all disabled:opacity-60 shadow-sm"
+              >
+                <Zap class="w-3.5 h-3.5 text-amber-500" :class="{ 'animate-spin': isTesting }" />
+                <span>{{ isTesting ? '正在连通测试中...' : '⚡ 测试当前 API 连通性（向后端发起探针测试）' }}</span>
+              </button>
+
+              <div
+                v-if="testResult"
+                class="mt-2.5 p-2.5 rounded-xl text-xs space-y-0.5"
+                :class="testResult.success ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'"
+              >
+                <div class="font-bold flex items-center justify-between">
+                  <span>{{ testResult.success ? '✓ 连通正常！API 认证有效' : '✗ 连通失败' }}</span>
+                  <span v-if="testResult.latencyMs" class="font-mono text-[10px] opacity-75">{{ testResult.latencyMs }}ms</span>
+                </div>
+                <p class="text-[11px] leading-relaxed opacity-90">{{ testResult.message }}</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -242,10 +267,12 @@ import {
   Database,
   Download,
   Upload,
-  ShieldCheck
+  ShieldCheck,
+  Zap
 } from 'lucide-vue-next';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useRuleStore } from '../stores/ruleStore';
+import { testLlmConnectionApi } from '../utils/api';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -259,6 +286,8 @@ const settingsStore = useSettingsStore();
 const ruleStore = useRuleStore();
 
 const showKey = ref(false);
+const isTesting = ref(false);
+const testResult = ref<{ success: boolean; message: string; latencyMs?: number } | null>(null);
 
 const form = reactive({
   baseUrl: settingsStore.baseUrl,
@@ -291,6 +320,45 @@ function applyPreset(provider: 'deepseek' | 'openai' | 'moonshot') {
   } else if (provider === 'moonshot') {
     form.baseUrl = 'https://api.moonshot.cn/v1';
     form.model = 'moonshot-v1-8k';
+  }
+}
+
+async function handleTestConnection() {
+  if (!form.apiKey || form.apiKey.trim().length < 5) {
+    testResult.value = { success: false, message: '请先填入有效的 API Key 才能进行测试' };
+    return;
+  }
+
+  isTesting.value = true;
+  testResult.value = null;
+
+  try {
+    const res = await testLlmConnectionApi({
+      baseUrl: form.baseUrl,
+      apiKey: form.apiKey,
+      model: form.model
+    });
+
+    if (res.success) {
+      testResult.value = {
+        success: true,
+        latencyMs: res.latencyMs,
+        message: `连通正常！模型成功返回：“${res.reply || '收到'}”，网络通信完全畅通。`
+      };
+    } else {
+      testResult.value = {
+        success: false,
+        latencyMs: res.latencyMs,
+        message: res.error || '连通失败，请检查 BaseUrl 或 Key 余额/权限'
+      };
+    }
+  } catch (err: any) {
+    testResult.value = {
+      success: false,
+      message: `请求异常: ${err.message || '网络连接失败'}`
+    };
+  } finally {
+    isTesting.value = false;
   }
 }
 

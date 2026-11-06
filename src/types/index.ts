@@ -65,6 +65,8 @@ export interface ScoutSessionState {
   durationMinutes: number;        // 设定的采风时长（支持 15分钟 / 45分钟 / 3小时 / 5秒极速测试模式）
   lootEvent?: WildEventItem;      // 本次采风抓取到的野生事件
   lootAnalysisRaw?: string;       // 碰撞生成的诊断报告原文
+  isLiveAI?: boolean;             // 真实连通后端并由大模型研判完成（为 false 时为离线兜底）
+  aiError?: string;               // 若大模型研判未成功时的真实错误详情
 }
 
 // 8. 解析后的 AI 诊断块

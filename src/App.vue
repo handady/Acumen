@@ -48,14 +48,46 @@
                   每一条心法都经受过真实生活的印证 · 拒绝未经省察的自欺与虚妄
                 </p>
 
-                <!-- 今日认知心境便签小笺 (温润手写羊皮纸质感，晨昏自动轮换) -->
-                <div class="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50/80 via-amber-50/50 to-rose-50/50 border border-rose-100/90 shadow-sm flex items-start space-x-3">
-                  <span class="text-base">📌</span>
-                  <div class="space-y-0.5">
-                    <span class="text-[10px] font-bold text-rose-600 uppercase tracking-wider font-sans">今日心境便签</span>
-                    <p class="text-[11px] text-theme-text-main leading-relaxed font-sans italic">
-                      {{ dailyMotto }}
-                    </p>
+                <!-- 🎒 探针专注漫游心法 (单心法聚焦模式：全网定向搜索与研判 100% 围绕此篇展开) -->
+                <div class="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50/90 via-amber-50/40 to-pink-50/40 border border-rose-100/90 shadow-sm space-y-2">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-1.5">
+                      <span class="text-sm">🎯</span>
+                      <span class="text-xs font-bold text-rose-700 font-sans">当前漫游专注心法</span>
+                      <span class="px-2 py-0.2 rounded-full text-[10px] font-mono font-semibold bg-rose-100 text-rose-700">
+                        单篇精修
+                      </span>
+                    </div>
+
+                    <span class="text-[10px] text-theme-text-dim">
+                      全网定向搜寻与研判将 100% 聚焦于此
+                    </span>
+                  </div>
+
+                  <!-- 专注心法卡片展示 -->
+                  <div v-if="scoutStore.focusRule" class="flex items-center justify-between p-2.5 rounded-xl bg-white/95 border border-rose-200/80 shadow-2xs">
+                    <div
+                      @click="openRuleDetail(scoutStore.focusRule.id)"
+                      class="flex items-center space-x-2 cursor-pointer group flex-1 min-w-0 pr-2"
+                      :title="`点击查看 ${scoutStore.focusRule.id} 详情`"
+                    >
+                      <span class="font-mono text-rose-600 font-bold text-xs shrink-0">{{ scoutStore.focusRule.id }}</span>
+                      <span class="px-1.5 py-0.2 rounded text-[10px] bg-rose-50 text-rose-600 border border-rose-100 shrink-0 font-medium">
+                        {{ scoutStore.focusRule.scenario || '通用认知' }}
+                      </span>
+                      <span class="text-[11px] text-stone-700 truncate font-sans">
+                        {{ scoutStore.focusRule.ifCondition }}
+                      </span>
+                    </div>
+
+                    <span class="text-[10px] text-rose-500 font-medium shrink-0">
+                      ✓ 采风锁定中
+                    </span>
+                  </div>
+
+                  <!-- 未装载时的温馨提示 -->
+                  <div v-else class="text-[11px] text-theme-text-dim py-1 flex items-center space-x-1.5 italic">
+                    <span>暂无心法 · 在下方心法卡片点击「随身采风」，指定探针聚焦目标！</span>
                   </div>
                 </div>
 
@@ -233,6 +265,7 @@
                 :key="rule.id"
                 :rule="rule"
                 @open-detail="openRuleDetail"
+                @edit-rule="handleEditRule"
               />
             </div>
 
@@ -268,6 +301,7 @@
     <RuleDetailDrawer
       :rule="activeDetailRule"
       @close="activeDetailRule = null"
+      @edit-rule="handleEditRule"
     />
 
     <RuleEditModal
@@ -333,10 +367,19 @@ import studyBg from './assets/images/study-bg.png';
 
 import { useRuleStore } from './stores/ruleStore';
 import { useSettingsStore } from './stores/settingsStore';
+import { useScoutStore } from './stores/scoutStore';
 import { IfThenRule } from './types';
 
 const ruleStore = useRuleStore();
 const settingsStore = useSettingsStore();
+const scoutStore = useScoutStore();
+
+// 当前随身采风行囊中装载的心法规则列表
+const equippedRules = computed(() => {
+  return scoutStore.session.equippedRuleIds
+    .map(id => ruleStore.getRuleById(id))
+    .filter((r): r is IfThenRule => Boolean(r));
+});
 
 // 100% 本地直出全景背景：优先使用用户在设置中自定义的背景，默认直接使用本地 study-bg.png
 const currentBackground = computed(() => {
@@ -429,6 +472,15 @@ function openRuleDetail(ruleId: string) {
   const found = ruleStore.getRuleById(ruleId);
   if (found) {
     activeDetailRule.value = found;
+  }
+}
+
+function handleEditRule(ruleId: string) {
+  activeDetailRule.value = null;
+  const found = ruleStore.getRuleById(ruleId);
+  if (found) {
+    editingRule.value = found;
+    showRuleEditModal.value = true;
   }
 }
 

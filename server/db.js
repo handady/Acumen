@@ -52,6 +52,22 @@ db.exec(`
     author TEXT,
     FOREIGN KEY(rule_id) REFERENCES rules(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS scout_scenes (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    background_url TEXT NOT NULL,
+    character_url TEXT,
+    status_text TEXT NOT NULL,
+    tips_list TEXT NOT NULL,
+    created_at TEXT,
+    updated_at TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+  );
 `);
 
 // 种子规则（若数据库完全为空时自动装载）
@@ -368,6 +384,169 @@ export function deleteCase(caseId) {
   return true;
 }
 
+// ==================== AI 视觉场景主题工坊持久化 ====================
+
+const defaultSeedScenes = [
+  {
+    id: 'scene-study-desk',
+    name: '📖 晨曦治愈书房',
+    backgroundUrl: '',
+    characterUrl: '',
+    statusText: '探针在落地窗前静静品读心法，感悟真实生活智慧...',
+    tipsList: [
+      '小贴士：晨光正好，携带 1~3 篇待检验的心法出发采风吧！',
+      '探针正在记录窗外晨曦微光与心境的平和起伏...',
+      '正在从生活日常中捕捉心给定力、身知行止的真实印记...'
+    ]
+  },
+  {
+    id: 'scene-sakura-market',
+    name: '🌸 绯樱集市漫步',
+    backgroundUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80',
+    characterUrl: '',
+    statusText: '探针小助手正在集市熙攘人流中捕捉行为偏差...',
+    tipsList: [
+      '小贴士：携带 NEAR-MISS 多的规则卡采风，更容易辨别高精度的认知边界！',
+      '探针正在比对摊位老板的还价原话与博弈话术...',
+      '正在从嘈杂的生活日常中提取高价值冲突切片...'
+    ]
+  },
+  {
+    id: 'scene-coffee-study',
+    name: '☕ 街角深思书阁',
+    backgroundUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80',
+    characterUrl: '',
+    statusText: '探针正隐身于书架角落，观察人们面对焦虑时的物理微动作...',
+    tipsList: [
+      '小贴士：标签不是证据，必须指出事件里的具体原话或动作。',
+      '观察到一位程序员推开键盘，正站起身准备接水...',
+      '正在把一段拉扯两小时的会议纪要降维提炼...'
+    ]
+  },
+  {
+    id: 'scene-sonar-matrix',
+    name: '🛰️ 纯净声呐雷达 (极客视效)',
+    backgroundUrl: '',
+    characterUrl: '',
+    statusText: '动态声呐已启动，正在全频段扫描真实世界野生困境事件池...',
+    tipsList: [
+      '小贴士：5秒极速测试档位无需消耗真实时间，极速验证算法闭环！',
+      '声呐脉冲波穿透 12 个真实历史与商业决策切片...',
+      '正在锁定一个高置信度的决策困境事件...'
+    ]
+  }
+];
+
+export function getAllScenes() {
+  const rows = db.prepare(`
+    SELECT id, name, background_url as backgroundUrl, character_url as characterUrl,
+           status_text as statusText, tips_list as tipsListJson, created_at as createdAt, updated_at as updatedAt
+    FROM scout_scenes
+    ORDER BY created_at ASC
+  `).all();
+
+  return rows.map(r => {
+    let tipsList = [];
+    try {
+      tipsList = JSON.parse(r.tipsListJson);
+    } catch {
+      tipsList = [];
+    }
+    return {
+      id: r.id,
+      name: r.name,
+      backgroundUrl: r.backgroundUrl,
+      characterUrl: r.characterUrl || '',
+      statusText: r.statusText,
+      tipsList
+    };
+  });
+}
+
+export function insertScene(scene) {
+  const id = scene.id || `scene-${Date.now()}`;
+  const now = new Date().toISOString();
+  const tipsJson = JSON.stringify(scene.tipsList || []);
+
+  const stmt = db.prepare(`
+    INSERT INTO scout_scenes (id, name, background_url, character_url, status_text, tips_list, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  stmt.run(
+    id,
+    scene.name,
+    scene.backgroundUrl || '',
+    scene.characterUrl || '',
+    scene.statusText || '正在漫步采风中...',
+    tipsJson,
+    now,
+    now
+  );
+
+  return { ...scene, id };
+}
+
+export function updateScene(id, updates) {
+  const existing = db.prepare('SELECT * FROM scout_scenes WHERE id = ?').get(id);
+  if (!existing) return null;
+
+  // 物理清理被替换掉的旧背景图或角色图
+  if (updates.backgroundUrl !== undefined && existing.background_url && existing.background_url !== updates.backgroundUrl) {
+    deleteOldLocalImage(existing.background_url);
+  }
+  if (updates.characterUrl !== undefined && existing.character_url && existing.character_url !== updates.characterUrl) {
+    deleteOldLocalImage(existing.character_url);
+  }
+
+  const now = new Date().toISOString();
+  const name = updates.name !== undefined ? updates.name : existing.name;
+  const backgroundUrl = updates.backgroundUrl !== undefined ? updates.backgroundUrl : existing.background_url;
+  const characterUrl = updates.characterUrl !== undefined ? updates.characterUrl : existing.character_url;
+  const statusText = updates.statusText !== undefined ? updates.statusText : existing.status_text;
+  const tipsJson = updates.tipsList !== undefined ? JSON.stringify(updates.tipsList) : existing.tips_list;
+
+  db.prepare(`
+    UPDATE scout_scenes
+    SET name = ?, background_url = ?, character_url = ?, status_text = ?, tips_list = ?, updated_at = ?
+    WHERE id = ?
+  `).run(name, backgroundUrl, characterUrl, statusText, tipsJson, now, id);
+
+  return true;
+}
+
+export function deleteScene(id) {
+  const existing = db.prepare('SELECT background_url, character_url FROM scout_scenes WHERE id = ?').get(id);
+  if (existing) {
+    if (existing.background_url) deleteOldLocalImage(existing.background_url);
+    if (existing.character_url) deleteOldLocalImage(existing.character_url);
+  }
+  db.prepare('DELETE FROM scout_scenes WHERE id = ?').run(id);
+  return true;
+}
+
+// 通用键值配置 (用于全景背景图等)
+export function getAppSetting(key) {
+  const row = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(key);
+  return row ? row.value : null;
+}
+
+export function setAppSetting(key, value) {
+  if (key === 'global_background_url') {
+    const existing = getAppSetting(key);
+    if (existing && existing !== value) {
+      deleteOldLocalImage(existing);
+    }
+  }
+
+  db.prepare(`
+    INSERT INTO app_settings (key, value)
+    VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).run(key, value);
+  return true;
+}
+
 // 初始化种子数据检测
 function checkAndSeed() {
   const countRow = db.prepare('SELECT count(*) as count FROM rules').get();
@@ -375,6 +554,16 @@ function checkAndSeed() {
     console.log('[SQLite] 数据库为空，正在初始化默认种子规则...');
     syncBatchRules(defaultSeedRules);
     console.log('[SQLite] 默认种子数据写入完成！');
+  }
+
+  // 场景初始化
+  const sceneCount = db.prepare('SELECT count(*) as count FROM scout_scenes').get();
+  if (!sceneCount || sceneCount.count === 0) {
+    console.log('[SQLite] 场景库为空，正在初始化默认视觉场景...');
+    for (const sc of defaultSeedScenes) {
+      insertScene(sc);
+    }
+    console.log('[SQLite] 默认视觉场景写入完成！');
   }
 }
 

@@ -27,9 +27,10 @@
             <label class="block text-theme-text-muted font-medium mb-1">规则编号</label>
             <input
               v-model="form.id"
+              :disabled="!!editRule"
               type="text"
               placeholder="#005"
-              class="w-full px-3 py-2 rounded-xl bg-theme-secondary border border-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-300 font-mono font-bold text-rose-600"
+              class="w-full px-3 py-2 rounded-xl bg-theme-secondary border border-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-300 font-mono font-bold text-rose-600 disabled:opacity-60 disabled:cursor-not-allowed"
             />
           </div>
 

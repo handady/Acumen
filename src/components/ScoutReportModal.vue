@@ -27,29 +27,85 @@
         <!-- 1. 遭遇的野生事件切片 -->
         <div class="p-4 rounded-2xl bg-[#fef8f6] border border-rose-100 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-rose-600 flex items-center space-x-1.5">
-              <span>🕊️</span>
-              <span>漫步拾遗 · {{ scoutStore.session.lootEvent?.category || '真实情境' }}</span>
-            </span>
-            <span class="text-[11px] font-mono text-theme-text-dim">
-              {{ scoutStore.session.lootEvent?.id }}
-            </span>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-semibold text-rose-600 flex items-center space-x-1.5">
+                <span>🕊️</span>
+                <span>漫步拾遗 · {{ scoutStore.session.lootEvent?.category || '真实情境' }}</span>
+              </span>
+              <span
+                v-if="(scoutStore.session.lootEvent as any)?.source === 'DEEPSEEK_WEB_SEARCH'"
+                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200/80 flex items-center space-x-1"
+                title="由 DeepSeek 官方自研搜索引擎围绕心法关键词定向全网检索"
+              >
+                <span>🔍 DeepSeek 官方全网定向搜索</span>
+              </span>
+              <span
+                v-else-if="(scoutStore.session.lootEvent as any)?.source === 'LIVE_WEB_HOTLIST'"
+                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+              >
+                🌐 网络实时真实热点
+              </span>
+              <span
+                v-else
+                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-700 border border-rose-200/80"
+              >
+                📖 真实生活切片
+              </span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <a
+                v-if="(scoutStore.session.lootEvent as any)?.url"
+                :href="(scoutStore.session.lootEvent as any).url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-[11px] text-blue-500 hover:text-blue-700 hover:underline flex items-center space-x-0.5"
+                title="前往查看原网页"
+              >
+                <span>查看原帖</span>
+                <span class="text-[10px]">↗</span>
+              </a>
+              <span class="text-[11px] font-mono text-theme-text-dim">
+                {{ scoutStore.session.lootEvent?.id }}
+              </span>
+            </div>
           </div>
-          <h3 class="text-sm font-bold text-theme-text-main">
-            {{ scoutStore.session.lootEvent?.title }}
+          <h3 class="text-sm font-bold text-theme-text-main flex items-center space-x-1.5">
+            <span>{{ scoutStore.session.lootEvent?.title }}</span>
           </h3>
-          <p class="text-xs text-theme-text-muted leading-relaxed bg-white/90 p-3 rounded-xl border border-rose-100 font-sans">
+          <div class="text-xs text-theme-text-muted leading-relaxed bg-white/90 p-3 rounded-xl border border-rose-100 font-sans max-h-56 overflow-y-auto whitespace-pre-wrap selection:bg-rose-100">
             {{ scoutStore.session.lootEvent?.content }}
-          </p>
+          </div>
         </div>
 
         <!-- 2. 心法印照与对照解析 -->
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-theme-text-main uppercase tracking-wider flex items-center space-x-1.5">
-              <Sparkles class="w-4 h-4 text-rose-400" />
-              <span>心法照见结果</span>
-            </h4>
+            <div class="flex items-center space-x-2">
+              <h4 class="text-xs font-bold text-theme-text-main uppercase tracking-wider flex items-center space-x-1.5">
+                <Sparkles class="w-4 h-4 text-rose-400" />
+                <span>心法照见结果</span>
+              </h4>
+
+              <!-- 真实研判成功徽标 -->
+              <span
+                v-if="scoutStore.session.isLiveAI"
+                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-200/80 flex items-center space-x-1"
+                title="已连通 DeepSeek 依据 10 条硬约束完成真实碰撞研判"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>✨ DeepSeek 实时研判</span>
+              </span>
+
+              <!-- 离线或报错徽标（100%客观真实呈现，绝不虚假宣传） -->
+              <span
+                v-else
+                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200 flex items-center space-x-1"
+                :title="scoutStore.session.aiError || '未连通大模型'"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                <span>⚠️ 离线降级 (未连通大模型)</span>
+              </span>
+            </div>
             <button
               type="button"
               @click="copyPrompt"
@@ -58,6 +114,21 @@
               <Copy class="w-3.5 h-3.5" />
               <span>{{ copyStatus || '复制诊断 Prompt' }}</span>
             </button>
+          </div>
+
+          <!-- 离线/异常提示条 -->
+          <div
+            v-if="!scoutStore.session.isLiveAI"
+            class="p-3 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-xs text-amber-800 space-y-1"
+          >
+            <div class="flex items-center space-x-1.5 font-bold">
+              <AlertCircle class="w-4 h-4 text-amber-600" />
+              <span>大模型未成功执行碰撞研判</span>
+            </div>
+            <p class="text-[11px] text-amber-700 pl-5">
+              原因：{{ scoutStore.session.aiError || '未配置 API Key 或网络连通失败' }}。
+              <span class="text-theme-text-dim">当前展示为兜底记录，未强行伪造吻合项。可前往顶部「⚙️ 设置与数据中心」配置并测试 API 连通性。</span>
+            </p>
           </div>
 
           <!-- EVENT 定性：温和紫调 -->
@@ -154,10 +225,11 @@
         <div class="flex items-center space-x-3">
           <button
             type="button"
-            @click="$emit('close')"
-            class="px-4 py-2 rounded-xl text-xs font-medium text-theme-text-muted hover:text-theme-text-main"
+            @click="handleDiscard"
+            class="px-4 py-2 rounded-xl text-xs font-medium text-theme-text-muted hover:text-rose-600 hover:bg-rose-50 transition-colors"
+            title="放弃收录此篇见闻，探针重置回待机状态"
           >
-            暂不收录
+            暂不收录 (跳过)
           </button>
           <button
             type="button"
@@ -175,9 +247,10 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { BookOpen, X, Sparkles, Copy, Heart } from 'lucide-vue-next';
+import { BookOpen, X, Sparkles, Copy, Heart, AlertCircle } from 'lucide-vue-next';
 import confetti from 'canvas-confetti';
 import { useScoutStore } from '../stores/scoutStore';
+import { useSettingsStore } from '../stores/settingsStore';
 import { parseDiagnosticOutput } from '../utils/parser';
 import { buildDiagnosticPrompt } from '../utils/aiClient';
 
@@ -190,6 +263,7 @@ const emit = defineEmits<{
 }>();
 
 const scoutStore = useScoutStore();
+const settingsStore = useSettingsStore();
 const copyStatus = ref('');
 
 const parsedResult = computed(() => {
@@ -231,6 +305,11 @@ function handleClaim() {
   });
 
   scoutStore.claimLootAndMount();
+  emit('close');
+}
+
+function handleDiscard() {
+  scoutStore.discardLoot();
   emit('close');
 }
 </script>

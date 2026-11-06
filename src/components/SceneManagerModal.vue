@@ -243,6 +243,7 @@ import { ref, reactive } from 'vue';
 import { Image, X, Shuffle, Plus, Upload } from 'lucide-vue-next';
 import { useScoutStore } from '../stores/scoutStore';
 import { useSettingsStore } from '../stores/settingsStore';
+import { uploadImageApi } from '../utils/api';
 
 defineProps<{
   isOpen: boolean;
@@ -271,22 +272,26 @@ function applyGlobalBg() {
   }
 }
 
-function handleGlobalBgUpload(event: Event) {
+async function handleGlobalBgUpload(event: Event) {
   const input = event.target as HTMLInputElement;
   if (!input.files || input.files.length === 0) return;
   const file = input.files[0];
-  const reader = new FileReader();
-  reader.onload = e => {
-    const dataUrl = e.target?.result as string;
-    if (typeof settingsStore.setGlobalBackground === 'function') {
+
+  // 优先上传到服务端保存为磁盘实体大图，避免庞大 Base64 塞爆 LocalStorage
+  const uploadedUrl = await uploadImageApi(file);
+  if (uploadedUrl) {
+    settingsStore.setGlobalBackground(uploadedUrl);
+    alert('🎉 全景大图已成功存入本地磁盘并生效！整页已与新环境融为一体。');
+  } else {
+    // 离线降级
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target?.result as string;
       settingsStore.setGlobalBackground(dataUrl);
-    } else {
-      settingsStore.globalBackgroundUrl = dataUrl;
-      localStorage.setItem('acumen_global_bg_v1', dataUrl);
-    }
-    alert('🎉 全景背景上传成功！整页已与新环境融为一体。');
-  };
-  reader.readAsDataURL(file);
+      alert('🎉 全景背景上传成功！整页已与新环境融为一体。');
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 function handleResetGlobalBg() {
@@ -308,15 +313,21 @@ function applyScene(id: string) {
   scoutStore.session.sceneThemeId = id;
 }
 
-function handleFileUpload(event: Event) {
+async function handleFileUpload(event: Event) {
   const input = event.target as HTMLInputElement;
   if (!input.files || input.files.length === 0) return;
   const file = input.files[0];
-  const reader = new FileReader();
-  reader.onload = e => {
-    newScene.backgroundUrl = e.target?.result as string;
-  };
-  reader.readAsDataURL(file);
+
+  const uploadedUrl = await uploadImageApi(file);
+  if (uploadedUrl) {
+    newScene.backgroundUrl = uploadedUrl;
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => {
+      newScene.backgroundUrl = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 function handleAddScene() {

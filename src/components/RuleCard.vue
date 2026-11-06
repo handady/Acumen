@@ -109,21 +109,15 @@
             </div>
           </div>
 
-          <!-- 核心行动金句 (极度呼吸感，消除长文压抑) -->
-          <div class="p-3 rounded-2xl bg-gradient-to-r from-rose-50/30 to-apricot-50/20 border border-rose-100/60 flex-1 flex flex-col justify-center space-y-1">
-            <div class="text-[11px] font-bold text-sage-700 flex items-center space-x-1">
-              <span>🍵</span>
-              <span>心定要诀</span>
+          <!-- 正面核心情境设问 (遇境之时 If · 极度通透留白) -->
+          <div class="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50/40 via-apricot-50/25 to-pink-50/20 border border-rose-100/70 flex-1 flex flex-col justify-center space-y-1.5 shadow-[0_2px_8px_rgba(225,120,115,0.03)]">
+            <div class="text-[11px] font-bold text-rose-600 flex items-center space-x-1.5">
+              <span>🌱</span>
+              <span>遇境之时</span>
             </div>
             <p class="text-[14px] sm:text-[15px] font-semibold text-theme-text-main leading-relaxed line-clamp-3">
-              {{ rule.thenAction }}
+              {{ rule.ifCondition }}
             </p>
-          </div>
-
-          <!-- 底部微提示 -->
-          <div class="text-center text-[11px] text-theme-text-dim flex items-center justify-center space-x-1 pt-0.5">
-            <span>点击卡片翻面，查看遇境与深层机理</span>
-            <span class="text-rose-400">↷</span>
           </div>
         </div>
 
@@ -156,20 +150,21 @@
             </span>
           </div>
 
-          <!-- 随身携带按钮 -->
+          <!-- 采风行囊装载按钮（单心法专注修行） -->
           <button
             type="button"
             @click.stop="toggleEquip"
             :class="[
-              'px-4 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] transform active:scale-95 shadow-sm',
+              'px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] transform active:scale-95 shadow-sm',
               isPopping ? 'animate-stamp' : '',
               isEquipped
                 ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-fluffy-sm'
                 : 'bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300'
             ]"
+            :title="isEquipped ? '当前探针漫游正在专注探寻此心法' : '点击设为本次探针漫游专注探寻的心法'"
           >
             <Compass class="w-3.5 h-3.5" :class="{ 'animate-spin': isEquipped }" />
-            <span>{{ isEquipped ? '已入布袋' : '随身携带' }}</span>
+            <span>{{ isEquipped ? '🎯 专注采风中' : '🎒 设为采风目标' }}</span>
           </button>
         </div>
       </div>
@@ -197,13 +192,25 @@
             </span>
           </div>
 
-          <!-- 翻回正面角标 -->
-          <div
-            class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-stone-100 hover:bg-rose-50 text-stone-600 hover:text-rose-600 border border-stone-200/80 flex items-center space-x-1 transition-colors"
-            title="点击卡片翻回手札正面"
-          >
-            <RotateCcw class="w-3 h-3" />
-            <span>翻回正面</span>
+          <!-- 右侧操作组：修润与翻回正面 -->
+          <div class="flex items-center space-x-1.5">
+            <button
+              type="button"
+              @click.stop="$emit('edit-rule', rule.id)"
+              class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 flex items-center space-x-1 transition-colors shadow-2xs"
+              title="编辑修改此篇心法"
+            >
+              <Pencil class="w-3 h-3 text-rose-500" />
+              <span>修润</span>
+            </button>
+
+            <div
+              class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-stone-100 hover:bg-rose-50 text-stone-600 hover:text-rose-600 border border-stone-200/80 flex items-center space-x-1 transition-colors"
+              title="点击卡片翻回手札正面"
+            >
+              <RotateCcw class="w-3 h-3" />
+              <span>翻回正面</span>
+            </div>
           </div>
         </div>
 
@@ -264,7 +271,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Compass, Camera, RotateCw, RotateCcw, Trash2, BookOpen } from 'lucide-vue-next';
+import { Compass, Camera, RotateCw, RotateCcw, Trash2, BookOpen, Pencil } from 'lucide-vue-next';
 import { IfThenRule } from '../types';
 import { calculateRuleLevel, useRuleStore } from '../stores/ruleStore';
 import { useScoutStore } from '../stores/scoutStore';
@@ -276,6 +283,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'open-detail', ruleId: string): void;
+  (e: 'edit-rule', ruleId: string): void;
 }>();
 
 const ruleStore = useRuleStore();

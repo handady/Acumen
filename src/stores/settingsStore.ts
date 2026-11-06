@@ -1,6 +1,7 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import { ApiSettings } from '../types';
+import { fetchCommonSettingsApi, saveCommonSettingsApi } from '../utils/api';
 
 export const useSettingsStore = defineStore('settings', () => {
   // 检查是否有 session 保存的 key，否则 fallback 到 localStorage
@@ -22,24 +23,44 @@ export const useSettingsStore = defineStore('settings', () => {
     localStorage.getItem('acumen_show_onboarding') !== 'false'
   );
 
-  // 全景沉浸式背景图：100% 默认优先直读本地打包的 study-bg.png
-  // 如果 localStorage 存有旧版默认在线大树图 (photo-1518495973542-4542c06a5843)，自动清理并切回本地
+  // 全景沉浸式背景图：清理旧版庞大的 Base64 本地大图缓存
   const storedBg = localStorage.getItem('acumen_global_bg_v1') || '';
+  const isHeavyBase64 = storedBg.startsWith('data:image') || storedBg.length > 50000;
   const isOldTreeBg = storedBg.includes('photo-1518495973542-4542c06a5843');
-  if (isOldTreeBg) {
+  
+  if (isHeavyBase64 || isOldTreeBg) {
     localStorage.removeItem('acumen_global_bg_v1');
   }
 
-  const globalBackgroundUrl = ref<string>(isOldTreeBg ? '' : storedBg);
+  const globalBackgroundUrl = ref<string>((isHeavyBase64 || isOldTreeBg) ? '' : storedBg);
+
+  // 异步从后端同步全局背景
+  async function initSettingsFromBackend() {
+    try {
+      const common = await fetchCommonSettingsApi();
+      if (common && common.globalBackgroundUrl !== undefined) {
+        if (common.globalBackgroundUrl) {
+          globalBackgroundUrl.value = common.globalBackgroundUrl;
+          localStorage.setItem('acumen_global_bg_v1', common.globalBackgroundUrl);
+        }
+      }
+    } catch (e) {
+      console.warn('[settingsStore] 从后端拉取公共配置失败:', e);
+    }
+  }
+
+  initSettingsFromBackend();
 
   function setGlobalBackground(url: string) {
     globalBackgroundUrl.value = url;
     localStorage.setItem('acumen_global_bg_v1', url);
+    saveCommonSettingsApi({ globalBackgroundUrl: url });
   }
 
   function resetGlobalBackground() {
     globalBackgroundUrl.value = '';
     localStorage.removeItem('acumen_global_bg_v1');
+    saveCommonSettingsApi({ globalBackgroundUrl: '' });
   }
 
   // 保存设置并严格遵循安全模式

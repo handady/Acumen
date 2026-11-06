@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"node --experimental-sqlite server/index.js\" \"vite\"",
+    "dev": "concurrently -k --kill-others-on-fail -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"node --experimental-sqlite server/index.js\" \"vite\"",
     "dev:client": "vite",
     "server": "node --experimental-sqlite server/index.js",
     "build": "vue-tsc -b && vite build",

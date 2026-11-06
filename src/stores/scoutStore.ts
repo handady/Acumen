@@ -7,22 +7,44 @@ import { useRuleStore } from './ruleStore';
 import { useSettingsStore } from './settingsStore';
 import { callLlmDiagnostic } from '../utils/aiClient';
 import { parseDiagnosticOutput } from '../utils/parser';
+import { fetchScenesApi, createSceneApi, deleteSceneApi, settleScoutSessionApi } from '../utils/api';
 
 export const useScoutStore = defineStore('scout', () => {
   const ruleStore = useRuleStore();
   const settingsStore = useSettingsStore();
 
-  // 场景列表持久化（若包含旧版 unsplash 树图，平滑迁移至最新的初始场景列表）
+  // 场景列表持久化（清理旧版庞大 Base64 缓存，开箱即初始化为标准轻量列表）
   const savedScenes = localStorage.getItem('acumen_scout_scenes_v1');
-  const needsMigration = !savedScenes || savedScenes.includes('photo-1518495973542-4542c06a5843') || !savedScenes.includes('scene-study-desk');
-  const scenes = ref<ScoutSceneTheme[]>(needsMigration ? initialScenes : JSON.parse(savedScenes));
-  if (needsMigration) {
+  const hasHeavyBase64 = savedScenes && (savedScenes.includes('data:image') || savedScenes.length > 50000);
+  const needsReset = !savedScenes || hasHeavyBase64 || savedScenes.includes('photo-1518495973542-4542c06a5843') || !savedScenes.includes('scene-study-desk');
+  
+  if (hasHeavyBase64) {
+    console.log('[scoutStore] 检测到旧版本地巨大 Base64 场景缓存，已彻底清理释放空间！');
+  }
+
+  const scenes = ref<ScoutSceneTheme[]>(needsReset ? initialScenes : JSON.parse(savedScenes));
+  if (needsReset) {
     localStorage.setItem('acumen_scout_scenes_v1', JSON.stringify(initialScenes));
   }
 
   function persistScenes() {
     localStorage.setItem('acumen_scout_scenes_v1', JSON.stringify(scenes.value));
   }
+
+  // 异步从 SQLite 数据库拉取最新场景列表
+  async function initScenesFromBackend() {
+    try {
+      const backendScenes = await fetchScenesApi();
+      if (backendScenes && backendScenes.length > 0) {
+        scenes.value = backendScenes;
+        persistScenes();
+      }
+    } catch (err) {
+      console.warn('[scoutStore] 从后端拉取场景失败:', err);
+    }
+  }
+
+  initScenesFromBackend();
 
   // 每次派出是否随机挑选场景
   const randomSceneOnLaunch = ref<boolean>(
@@ -53,6 +75,7 @@ export const useScoutStore = defineStore('scout', () => {
 
   // 检查探针是否已到期（应对关闭网页重新打开）
   function checkExpiry() {
+    if (isSettling.value) return; // 正在等待大模型返回时，绝不重复触发
     if (session.value.status === 'SCOUTING' && session.value.endTime) {
       if (Date.now() >= session.value.endTime) {
         completeScouting();
@@ -66,25 +89,26 @@ export const useScoutStore = defineStore('scout', () => {
     return found || scenes.value[0] || initialScenes[0];
   });
 
-  // 行囊中携带的完整规则对象列表
+  // 行囊中携带的完整规则对象列表（漫游采风单心法专注模式：有且仅有 1 张）
   const equippedRules = computed(() => {
     return session.value.equippedRuleIds
       .map(id => ruleStore.getRuleById(id))
       .filter((r): r is NonNullable<typeof r> => Boolean(r));
   });
 
-  // 规则装填/卸载（最多 3 张）
+  // 当前探针漫游专注探寻的主力心法
+  const focusRule = computed(() => {
+    return equippedRules.value[0] || ruleStore.rules[0] || null;
+  });
+
+  // 规则装填/切换（单心法专注修行：点击直接切换为当前采风目标）
   function toggleEquipRule(ruleId: string) {
-    const idx = session.value.equippedRuleIds.indexOf(ruleId);
-    if (idx !== -1) {
-      session.value.equippedRuleIds.splice(idx, 1);
-    } else {
-      if (session.value.equippedRuleIds.length >= 3) {
-        // 最多 3 张，替换最早进入的一张
-        session.value.equippedRuleIds.shift();
-      }
-      session.value.equippedRuleIds.push(ruleId);
+    if (session.value.equippedRuleIds.includes(ruleId)) {
+      // 若已是当前唯一专注心法，且库中有其他心法，允许保留；若点击则不重复操作
+      return;
     }
+    // 单选模式：切换为该心法
+    session.value.equippedRuleIds = [ruleId];
     persistSession();
   }
 
@@ -129,37 +153,48 @@ export const useScoutStore = defineStore('scout', () => {
     }
   }
 
-  // 结算探针采风，生成野生事件战利品
+  // 是否正在与后端/大模型结算
+  const isSettling = ref(false);
+
+  // 结算探针采风：抓取真实互联网实时热点 + 由后端代发 DeepSeek 碰撞研判（彻底消除前端 CORS 跨域问题）
   async function completeScouting() {
-    session.value.status = 'READY_TO_CLAIM';
+    if (isSettling.value) return; // 防重入保护：已在向大模型请求中，禁止重复发起
+    isSettling.value = true;
 
-    // 从真实事件池随机挑选一个野生事件
-    const pool = initialWildEvents;
-    const randomEvent = pool[Math.floor(Math.random() * pool.length)];
-    session.value.lootEvent = randomEvent;
+    try {
+      const serverResult = await settleScoutSessionApi({
+        equippedRules: equippedRules.value,
+        apiKey: settingsStore.apiKey,
+        baseUrl: settingsStore.baseUrl,
+        model: settingsStore.model
+      });
 
-    // 碰撞分析生成
-    if (settingsStore.isConfigured) {
-      // 尝试调用用户配置的大模型
-      try {
-        const rawOutput = await callLlmDiagnostic({
-          baseUrl: settingsStore.baseUrl,
-          apiKey: settingsStore.apiKey,
-          model: settingsStore.model,
-          rules: equippedRules.value,
-          eventText: randomEvent.content
-        });
-        session.value.lootAnalysisRaw = rawOutput;
-      } catch (err) {
-        console.warn('API 直连诊断失败，自动回退至高质量预计算结果:', err);
-        session.value.lootAnalysisRaw = randomEvent.precomputedResult || '';
+      if (serverResult && serverResult.success && serverResult.lootEvent) {
+        session.value.status = 'READY_TO_CLAIM';
+        session.value.lootEvent = serverResult.lootEvent;
+        session.value.lootAnalysisRaw = serverResult.lootAnalysisRaw;
+        session.value.isLiveAI = Boolean(serverResult.isLiveAI);
+        session.value.aiError = serverResult.aiError;
+        persistSession();
+        isSettling.value = false;
+        return;
       }
-    } else {
-      // 零 API 模式：使用高质量预计算结果
-      session.value.lootAnalysisRaw = randomEvent.precomputedResult || '';
+    } catch (e: any) {
+      console.warn('[scoutStore] 调取服务端探针结算失败，将启动本地兜底:', e);
+      session.value.isLiveAI = false;
+      session.value.aiError = `请求异常: ${e?.message || '无法连接后端'}`;
     }
 
+    // 离线备用降级
+    const pool = initialWildEvents;
+    const randomEvent = pool[Math.floor(Math.random() * pool.length)];
+    session.value.status = 'READY_TO_CLAIM';
+    session.value.lootEvent = randomEvent;
+    session.value.lootAnalysisRaw = randomEvent.precomputedResult || '';
+    session.value.isLiveAI = false;
+    session.value.aiError = '未能连通后端服务，已切换为经典离线切片';
     persistSession();
+    isSettling.value = false;
   }
 
   // 一键将战利品判例收录进对应规则卡片
@@ -238,7 +273,17 @@ export const useScoutStore = defineStore('scout', () => {
     return { mountedCount, gainedExp };
   }
 
-  // 场景管理：添加场景
+  // 放弃/跳过本次见闻，释放探针回到待机状态
+  function discardLoot() {
+    session.value.status = 'IDLE';
+    session.value.startTime = undefined;
+    session.value.endTime = undefined;
+    session.value.lootEvent = undefined;
+    session.value.lootAnalysisRaw = undefined;
+    persistSession();
+  }
+
+  // 场景管理：添加场景（同时持久化到 SQLite）
   function addScene(theme: Omit<ScoutSceneTheme, 'id'>) {
     const newTheme: ScoutSceneTheme = {
       ...theme,
@@ -246,10 +291,11 @@ export const useScoutStore = defineStore('scout', () => {
     };
     scenes.value.push(newTheme);
     persistScenes();
+    createSceneApi(newTheme);
     return newTheme;
   }
 
-  // 删除场景
+  // 删除场景（同时触发 SQLite 记录与磁盘大图物理清理）
   function deleteScene(id: string) {
     if (scenes.value.length <= 1) return; // 至少保留 1 个
     scenes.value = scenes.value.filter(s => s.id !== id);
@@ -258,6 +304,7 @@ export const useScoutStore = defineStore('scout', () => {
       persistSession();
     }
     persistScenes();
+    deleteSceneApi(id);
   }
 
   // 恢复默认场景
@@ -271,9 +318,11 @@ export const useScoutStore = defineStore('scout', () => {
   return {
     scenes,
     session,
+    isSettling,
     randomSceneOnLaunch,
     activeScene,
     equippedRules,
+    focusRule,
     checkExpiry,
     setRandomScene,
     toggleEquipRule,
@@ -282,6 +331,7 @@ export const useScoutStore = defineStore('scout', () => {
     recallNow,
     completeScouting,
     claimLootAndMount,
+    discardLoot,
     addScene,
     deleteScene,
     resetScenesToDefault
